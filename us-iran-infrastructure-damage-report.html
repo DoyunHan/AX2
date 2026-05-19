@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025-2026 미국-이란 분쟁 인프라 피해 및 재건 비용 종합 보고서</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cormorant+Garamond:wght@600;700&family=Playfair+Display:wght@700;900&display=swap');
+
+        :root {
+            --bg-0: #0c0e1a;
+            --bg-1: #101228;
+            --bg-2: #181b38;
+            --bg-3: #1f2345;
+            --bg-4: #262a52;
+            --text-primary: #e8e6e3;
+            --text-secondary: #a8a8a8;
+            --text-muted: #707080;
+            --accent-red: #ff4444;
+            --accent-red-soft: #e8555530;
+            --accent-orange: #ff8c42;
+            --accent-gold: #ffd700;
+            --accent-amber: #f59e0b;
+            --accent-blue: #4a9eff;
+            --accent-cyan: #00d4ff;
+            --accent-teal: #2dd4bf;
+            --accent-purple: #a855f7;
+            --accent-violet: #8b5cf6;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-subtle: rgba(255, 255, 255, 0.03);
+            --nav-text: #64748b;
+            --gradient-fire: linear-gradient(135deg, #ff4444, #ff8c42);
+            --gradient-blue: linear-gradient(135deg, #4a9eff, #00d4ff);
+            --gradient-gold: linear-gradient(135deg, #ffd700, #ff8c42);
+            --gradient-purple: linear-gradient(135deg, #a855f7, #4a9eff);
+            --gradient-teal: linear-gradient(135deg, #2dd4bf, #4a9eff);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-0);
+            color: var(--text-primary);
+            line-height: 1.8;
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse at 20% 40%, rgba(255, 68, 68, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 75% 20%, rgba(74, 158, 255, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+                var(--bg-0);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 30% 50%, rgba(255, 140, 66, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 70% 30%, rgba(74, 158, 255, 0.03) 0%, transparent 35%);
+            animation: heroBgShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroBgShift {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z' fill='none' stroke='rgba(255,255,255,0.015)' stroke-width='0.5'/%3E%3C/svg%3E");
+            opacity: 0.4;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+            padding: 2rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.8rem;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent-purple);
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.08);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #d4d0e0 40%, #a8a0c0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-meta .icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .hero-meta .icon-date { background: var(--accent-blue); }
+        .hero-meta .icon-period { background: var(--accent-orange); }
+        .hero-meta .icon-parties { background: var(--accent-red); }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scrollBounce 2.5s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .scroll-indicator svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .scroll-indicator::after {
+            content: '';
+            display: block;
+            width: 1px;
+            height: 36px;
+            background: linear-gradient(to bottom, var(--text-muted), transparent);
+        }
+
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* ===== HERO → STATS TRANSITION ===== */
+        .hero-fade {
+            height: 120px;
+            background: linear-gradient(to bottom, var(--bg-0), var(--bg-1));
+        }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            background: var(--bg-1);
+            border-bottom: 1px solid var(--border-color);
+            padding: 3.5rem 2rem;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            line-height: 1.2;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .stat-number[data-color="fire"] {
+            background: var(--gradient-fire);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-number[data-color="blue"] {
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-number[data-color="gold"] {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-number[data-color="purple"] {
+            background: var(--gradient-purple);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-number[data-color="teal"] {
+            background: var(--gradient-teal);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+
+        /* ===== NAVIGATION ===== */
+        .toc-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(12, 14, 26, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toc-nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            position: relative;
+        }
+
+        .toc-nav-inner::-webkit-scrollbar { display: none; }
+
+        .toc-nav a {
+            display: block;
+            padding: 0.9rem 1.2rem;
+            color: var(--nav-text);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            margin: 0.35rem 0.15rem;
+        }
+
+        .toc-nav a:hover,
+        .toc-nav a.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: var(--gradient-purple);
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .content > .section > p,
+        .content > .section > blockquote {
+            max-width: 720px;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            padding: 7rem 0;
+            position: relative;
+        }
+
+        .section + .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-color), transparent);
+        }
+
+        .section-header {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: rgba(168, 85, 247, 0.04);
+            line-height: 1;
+            margin-bottom: -1.2rem;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .section h2 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 3px solid var(--nav-text);
+            line-height: 1.3;
+        }
+
+        /* Sector-specific h2 borders */
+        #energy .section h2,
+        #energy.section h2 { border-left-color: var(--accent-amber); }
+        #transport .section h2,
+        #transport.section h2 { border-left-color: var(--accent-teal); }
+        #military .section h2,
+        #military.section h2 { border-left-color: var(--accent-red); }
+        #comm .section h2,
+        #comm.section h2 { border-left-color: var(--accent-violet); }
+        #industry .section h2,
+        #industry.section h2 { border-left-color: var(--accent-gold); }
+        #water .section h2,
+        #water.section h2 { border-left-color: var(--accent-cyan); }
+        #cost .section h2,
+        #cost.section h2 { border-left-color: var(--accent-red); }
+        #outlook .section h2,
+        #outlook.section h2 { border-left-color: var(--accent-blue); }
+
+        .section h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .section h3::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        #energy h3::before { background: var(--accent-amber); }
+        #transport h3::before { background: var(--accent-teal); }
+        #military h3::before { background: var(--accent-red); }
+        #comm h3::before { background: var(--accent-violet); }
+        #industry h3::before { background: var(--accent-gold); }
+        #water h3::before { background: var(--accent-cyan); }
+        #cost h3::before { background: var(--accent-red); }
+        #outlook h3::before { background: var(--accent-blue); }
+
+        .section h4 {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        /* ===== CARDS ===== */
+        .damage-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .damage-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Sector card borders */
+        #energy .damage-card::before { background: linear-gradient(to bottom, var(--accent-amber), var(--accent-orange)); }
+        #transport .damage-card::before { background: linear-gradient(to bottom, var(--accent-teal), var(--accent-blue)); }
+        #military .damage-card::before { background: var(--gradient-fire); }
+        #comm .damage-card::before { background: linear-gradient(to bottom, var(--accent-violet), var(--accent-purple)); }
+        #industry .damage-card::before { background: linear-gradient(to bottom, var(--accent-gold), var(--accent-amber)); }
+        #water .damage-card::before { background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-blue)); }
+
+        .damage-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Critical card variant */
+        .damage-card.critical {
+            border-color: rgba(255, 68, 68, 0.15);
+            background: linear-gradient(135deg, var(--bg-2), rgba(255, 68, 68, 0.03));
+        }
+
+        .damage-card.critical::before {
+            width: 4px;
+            background: var(--accent-red);
+        }
+
+        .critical-badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            background: rgba(255, 68, 68, 0.12);
+            color: var(--accent-red);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 4px;
+            margin-left: 0.8rem;
+            vertical-align: middle;
+        }
+
+        .damage-card h4 {
+            margin-top: 0;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.12rem;
+        }
+
+        /* Hero numbers pattern in cards */
+        .card-hero-numbers {
+            display: flex;
+            gap: 2.5rem;
+            padding: 1.2rem 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+
+        .card-hero-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-hero-stat .big-number {
+            font-size: 1.6rem;
+            font-weight: 900;
+            font-family: 'Cormorant Garamond', serif;
+            line-height: 1.2;
+        }
+
+        .card-hero-stat .big-number.cost-num {
+            color: var(--accent-red);
+            text-shadow: 0 0 25px rgba(255, 68, 68, 0.2);
+        }
+
+        .card-hero-stat .big-number.impact-num {
+            color: var(--accent-gold);
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+        }
+
+        .card-hero-stat .big-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.2rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .card-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            color: var(--text-secondary);
+        }
+
+        .card-value.highlight {
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .card-value.cost {
+            color: var(--accent-red);
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.15);
+        }
+
+        /* 2-column card grid */
+        .card-grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* ===== TABLES ===== */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        thead {
+            background: var(--bg-3);
+        }
+
+        th {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) td { background: rgba(255, 255, 255, 0.012); }
+        tr:hover td { background: rgba(255, 255, 255, 0.025); }
+
+        td strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* ===== BLOCKQUOTES ===== */
+        blockquote {
+            border-left: 3px solid var(--accent-violet);
+            background: rgba(139, 92, 246, 0.04);
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 10px 10px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* ===== ORDERED LISTS ===== */
+        .challenge-list {
+            list-style: none;
+            counter-reset: challenge;
+        }
+
+        .challenge-list > li {
+            counter-increment: challenge;
+            position: relative;
+            padding: 1.5rem;
+            padding-left: 4rem;
+            margin-bottom: 1rem;
+            background: var(--bg-2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .challenge-list > li:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .challenge-list > li::before {
+            content: counter(challenge);
+            position: absolute;
+            left: 1.2rem;
+            top: 1.5rem;
+            width: 28px;
+            height: 28px;
+            background: var(--gradient-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+
+        .challenge-list > li strong {
+            color: var(--text-primary);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-list > li ul {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+
+        .challenge-list > li ul li {
+            color: var(--text-secondary);
+            padding: 0.3rem 0;
+            padding-left: 1.2rem;
+            position: relative;
+        }
+
+        .challenge-list > li ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+            width: 5px;
+            height: 5px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+        }
+
+        /* ===== COST SUMMARY ===== */
+        .cost-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .cost-card.fire {
+            border-color: rgba(255, 68, 68, 0.12);
+            background: linear-gradient(135deg, var(--bg-2), rgba(255, 68, 68, 0.02));
+        }
+
+        .cost-card.amber {
+            border-color: rgba(255, 140, 66, 0.15);
+            background: linear-gradient(135deg, var(--bg-2), rgba(255, 140, 66, 0.02));
+        }
+
+        .cost-card.purple {
+            border-color: rgba(168, 85, 247, 0.15);
+            background: linear-gradient(135deg, var(--bg-2), rgba(168, 85, 247, 0.02));
+        }
+
+        .cost-card .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .cost-card .cost-row:last-child { border-bottom: none; }
+
+        .cost-card .cost-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .cost-card .cost-amount {
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-align: right;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .cost-card .cost-amount.red {
+            color: var(--accent-red);
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.15);
+        }
+
+        .cost-card .cost-amount.orange { color: var(--accent-orange); }
+        .cost-card .cost-amount.purple { color: var(--accent-purple); }
+
+        /* ===== BAR CHART ===== */
+        .bar-chart {
+            margin: 2rem 0;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .bar-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 180px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 28px;
+            background: var(--bg-3);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            min-width: fit-content;
+            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .bar-fill.fire { background: linear-gradient(90deg, #ff4444, #ff8c42); }
+        .bar-fill.blue { background: linear-gradient(90deg, #4a9eff, #00d4ff); }
+        .bar-fill.gold { background: linear-gradient(90deg, #ffd700, #ff8c42); }
+        .bar-fill.purple { background: linear-gradient(90deg, #a855f7, #4a9eff); }
+        .bar-fill.teal { background: linear-gradient(90deg, #2dd4bf, #4a9eff); }
+
+        .bar-fill[data-width] { width: 0; }
+        .bar-fill.animated { width: var(--bar-w); }
+
+        /* ===== SOURCES ===== */
+        .sources-section {
+            background: var(--bg-1);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .sources-section h4 {
+            color: var(--accent-blue);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .sources-section h4:first-child { margin-top: 0; }
+
+        .source-list { list-style: none; }
+
+        .source-list li { padding: 0.35rem 0; }
+
+        .source-list a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.82rem;
+            transition: color 0.2s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .source-list a:hover {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        /* ===== DISCLAIMER ===== */
+        .disclaimer {
+            background: rgba(255, 215, 0, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin: 3rem 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            backdrop-filter: blur(10px);
+        }
+
+        .disclaimer strong { color: var(--accent-gold); }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .section { padding: 4rem 0; }
+            .section-number { font-size: 2.5rem; }
+            .section h2 { font-size: 1.5rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            .card-grid-2col { grid-template-columns: 1fr; }
+            .card-label { margin-top: 0.5rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-number { font-size: 1.8rem; }
+            .content { padding: 0 1rem; }
+            .damage-card { padding: 1.5rem; }
+            .cost-card .cost-row { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+            .card-hero-numbers { gap: 1.5rem; }
+            .bar-label { min-width: 120px; font-size: 0.72rem; }
+            .bar-row { gap: 0.5rem; }
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger delays */
+        .animate-on-scroll:nth-child(2) { transition-delay: 0.08s; }
+        .animate-on-scroll:nth-child(3) { transition-delay: 0.16s; }
+        .animate-on-scroll:nth-child(4) { transition-delay: 0.24s; }
+        .animate-on-scroll:nth-child(5) { transition-delay: 0.32s; }
+
+        /* Section icon badges */
+        .section-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 1.15rem;
+        }
+
+        .icon-energy { background: rgba(245, 158, 11, 0.1); }
+        .icon-transport { background: rgba(45, 212, 191, 0.1); }
+        .icon-military { background: rgba(255, 68, 68, 0.1); }
+        .icon-comm { background: rgba(139, 92, 246, 0.1); }
+        .icon-industry { background: rgba(255, 215, 0, 0.1); }
+        .icon-water { background: rgba(0, 212, 255, 0.1); }
+        .icon-cost { background: rgba(255, 68, 68, 0.1); }
+        .icon-outlook { background: rgba(74, 158, 255, 0.1); }
+
+        /* ===== PRINT ===== */
+        @media print {
+            body { background: #fff; color: #000; font-size: 11pt; }
+            .hero { min-height: auto; background: none; padding: 2rem 0; }
+            .hero h1 { -webkit-text-fill-color: #000; background: none; }
+            .toc-nav, .scroll-indicator, .hero-fade, .nav-progress { display: none; }
+            .section { padding: 1.5rem 0; }
+            .damage-card, .cost-card, .table-wrapper { break-inside: avoid; }
+            .source-list a::after { content: ' (' attr(href) ')'; font-size: 0.7em; color: #666; }
+            .animate-on-scroll { opacity: 1; transform: none; }
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Mobile table card reflow */
+        @media (max-width: 640px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead { display: none; }
+            tr {
+                background: var(--bg-2);
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                padding: 1rem;
+                margin-bottom: 0.8rem;
+            }
+            td {
+                padding: 0.4rem 0;
+                border: none;
+                display: flex;
+                gap: 0.5rem;
+            }
+            td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 0.72rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--text-muted);
+                min-width: 70px;
+            }
+        }
+        /* ===== MERMAID CHARTS ===== */
+        .mermaid-wrapper {
+            margin: 2.5rem 0;
+            padding: 2rem;
+            background: var(--bg-1);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow-x: auto;
+        }
+
+        .mermaid-wrapper h4 {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Override mermaid text colors for dark theme */
+        .mermaid svg {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">Comprehensive Report</div>
+        <h1>2025-2026 미국-이란 분쟁<br>인프라 피해 및 재건 비용<br>종합 보고서</h1>
+        <div class="hero-meta">
+            <span><span class="icon icon-date"></span>작성일: 2026년 4월 8일</span>
+            <span><span class="icon icon-period"></span>분쟁 기간: 2026.02.28 ~ 현재 진행 중</span>
+            <span><span class="icon icon-parties"></span>미국, 이스라엘 (공격) / 이란 (방어 및 보복)</span>
+        </div>
+    </div>
+    <div class="scroll-indicator">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+</section>
+
+<div class="hero-fade"></div>
+
+<!-- ===== STATS BAR ===== -->
+<section class="stats-bar">
+    <div class="stats-grid">
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-number" data-color="fire" data-target="9">0</div>
+            <div class="stat-label">피해 국가</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-number" data-color="gold" data-target="40">0</div>
+            <div class="stat-label">손상된 주요 에너지 자산</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-number" data-color="blue" data-target="900" data-suffix="만">0</div>
+            <div class="stat-label">일일 석유 공급 차단 (배럴)</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-number" data-color="purple" data-target="19" data-suffix="%">0</div>
+            <div class="stat-label">글로벌 LNG 거래 영향</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-number" data-color="teal" data-target="63" data-suffix="%">0</div>
+            <div class="stat-label">유럽 에너지 가격 상승</div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="toc-nav">
+    <div class="toc-nav-inner">
+        <a href="#overview">개요</a>
+        <a href="#energy">에너지</a>
+        <a href="#transport">교통/항만</a>
+        <a href="#military">군사</a>
+        <a href="#comm">통신/디지털</a>
+        <a href="#industry">산업</a>
+        <a href="#water">수자원</a>
+        <a href="#cost">재건 비용</a>
+        <a href="#outlook">전망</a>
+        <a href="#sources">출처</a>
+    </div>
+    <div class="nav-progress" id="navProgress"></div>
+</nav>
+
+<div class="content">
+
+    <!-- ===== 1. 개요 ===== -->
+    <section id="overview" class="section">
+        <div class="section-header">
+            <div class="section-number">01</div>
+            <h2>개요</h2>
+        </div>
+        <p>2026년 2월 28일, 미국과 이스라엘 연합군이 이란에 대한 합동 공습을 개시하면서 시작된 이 분쟁은 중동 전역에 걸쳐 광범위한 인프라 파괴를 초래했다. 이란 본토의 핵시설, 에너지 시설, 군사기지뿐만 아니라, 이란의 보복 공격으로 인해 카타르, UAE, 사우디아라비아, 쿠웨이트, 바레인, 오만 등 걸프 지역 국가들의 에너지 및 항만 시설도 심각한 피해를 입었다.</p>
+
+        <!-- Mermaid: 분쟁 구조 흐름도 -->
+        <div class="mermaid-wrapper animate-on-scroll">
+            <h4>분쟁 구조 및 피해 흐름</h4>
+            <pre class="mermaid">
+flowchart LR
+    subgraph ATK["🇺🇸🇮🇱 공격측"]
+        US["미국"]
+        IL["이스라엘"]
+    end
+
+    subgraph IRAN_TGT["🇮🇷 이란 본토 피해"]
+        NUC["핵시설\n나탄즈 · 포르도 · 에스파한"]
+        ENERGY_IR["에너지\n사우스 파르스 · 카르그섬"]
+        MIL["군사기지\n반더 압바스 · IRGC 사령부"]
+        COMM["통신\n인터넷 37일 차단"]
+        IND["산업\n철강 70% 파괴"]
+    end
+
+    subgraph RETALIATION["🇮🇷 이란 보복 대상"]
+        QA["🇶🇦 카타르\n라스 라판 LNG"]
+        UAE["🇦🇪 UAE\n루와이스 · 제벨알리"]
+        SA["🇸🇦 사우디\n라스 타누라 · 삼렉"]
+        KW["🇰🇼 쿠웨이트\n정유소 · 담수화"]
+        BH["🇧🇭 바레인\nBAPCO"]
+        OM["🇴🇲 오만\n두깜/살랄라"]
+    end
+
+    US -->|합동 공습| NUC
+    US -->|순항미사일\nB-2 폭격| ENERGY_IR
+    IL -->|공군 타격| ENERGY_IR
+    IL -->|벙커버스터| NUC
+    US --> MIL
+    IL --> MIL
+    IL --> COMM
+    IL --> IND
+
+    IRAN_TGT -.->|보복 공격| QA
+    IRAN_TGT -.->|드론 · 미사일| UAE
+    IRAN_TGT -.->|드론 공격| SA
+    IRAN_TGT -.->|미사일| KW
+    IRAN_TGT -.->|공습| BH
+    IRAN_TGT -.->|드론| OM
+
+    style ATK fill:#1e293b,stroke:#ff4444,color:#fff
+    style IRAN_TGT fill:#1e1b2e,stroke:#ff8c42,color:#fff
+    style RETALIATION fill:#1e293b,stroke:#4a9eff,color:#fff
+    style US fill:#2d1f1f,stroke:#ff4444,color:#e8e6e3
+    style IL fill:#2d1f1f,stroke:#ff4444,color:#e8e6e3
+    style NUC fill:#2a1a2e,stroke:#a855f7,color:#e8e6e3
+    style ENERGY_IR fill:#2a2010,stroke:#f59e0b,color:#e8e6e3
+    style MIL fill:#2a1515,stroke:#ff4444,color:#e8e6e3
+    style COMM fill:#1a1a2e,stroke:#8b5cf6,color:#e8e6e3
+    style IND fill:#2a2510,stroke:#ffd700,color:#e8e6e3
+    style QA fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+    style UAE fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+    style SA fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+    style KW fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+    style BH fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+    style OM fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+            </pre>
+        </div>
+    </section>
+
+    <!-- ===== 2. 에너지 인프라 ===== -->
+    <section id="energy" class="section">
+        <div class="section-header">
+            <div class="section-number">02</div>
+            <div class="section-icon icon-energy">&#9889;</div>
+            <h2>에너지 인프라 피해</h2>
+        </div>
+
+        <!-- Mermaid: 주요 공격 타임라인 -->
+        <div class="mermaid-wrapper animate-on-scroll">
+            <h4>주요 에너지 시설 공격 타임라인</h4>
+            <pre class="mermaid">
+timeline
+    title 2025-2026 에너지 인프라 공격 연대기
+    section 2025년
+        6월 : 나탄즈 핵시설 1차 공격 (이스라엘)
+             : 포르도 핵시설 공격 (미군 B-2)
+    section 2026년 3월
+        3월 1일 : 차바하르/콘아락 해군기지 (미군)
+                : 제벨알리 항구 피격 (이란 보복)
+        3월 2일 : 나탄즈 2차 폭격 (미군)
+                : 라스 타누라 드론 공격 (이란)
+        3월 6일 : 이란 인터넷 완전 차단 시작
+        3월 7일 : 메흐라바드 공항 19대 파괴 (이스라엘)
+                : 케시 섬 담수화 시설 파괴 (미군)
+        3월 18일 : 사우스 파르스 가스전 공격 (이스라엘)
+                 : 라스 라판 LNG 피격 (이란 보복)
+        3월 19일 : 삼렉 정유소 드론 충돌 (이란)
+        3월 27-28일 : 사바/카비르 제철소 공습 (이스라엘)
+    section 2026년 4월
+        4월 3일 : 쿠웨이트 정유소/담수화 피격 (이란)
+                : 네타냐후 철강 70% 파괴 발표
+        4월 5일 : 루와이스 정유소 화재 확인
+        4월 7일 : 8개 교량 파괴 공식 확인
+            </pre>
+        </div>
+
+        <h3>2.1 이란 내 에너지 시설</h3>
+
+        <!-- South Pars -->
+        <div class="damage-card critical animate-on-scroll">
+            <h4>사우스 파르스 가스전 및 아살루예 복합시설 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(South Pars / Asaluyeh)</span><span class="critical-badge">Critical</span></h4>
+            <div class="card-hero-numbers">
+                <div class="card-hero-stat">
+                    <span class="big-number cost-num">$26억</span>
+                    <span class="big-label">재건 비용</span>
+                </div>
+                <div class="card-hero-stat">
+                    <span class="big-number impact-num">12%</span>
+                    <span class="big-label">가스 생산 차단</span>
+                </div>
+                <div class="card-hero-stat">
+                    <span class="big-number impact-num">5년+</span>
+                    <span class="big-label">재건 기간</span>
+                </div>
+            </div>
+            <div class="card-grid">
+                <span class="card-label">위치</span>
+                <span class="card-value">페르시아만 남부, 이란</span>
+                <span class="card-label">공격일</span>
+                <span class="card-value">2026년 3월 18일</span>
+                <span class="card-label">공격 주체</span>
+                <span class="card-value">이스라엘 공군</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">남파르스 가스전 4개 시설 피격. 정제소 4번(최대 규모) 거의 완전 파괴, 정제소 7번 심각한 손상. 아살루예 석유화학 시설의 저장 탱크, 가스 설비, 정유소 손상</span>
+                <span class="card-label">생산 영향</span>
+                <span class="card-value highlight">이란 전체 가스 생산의 약 12% 차단, 일일 1억 세제곱미터 정제 능력 상실. 2개 정유소 운영 완전 중단</span>
+                <span class="card-label">전략적 중요성</span>
+                <span class="card-value">이란 국내 가스 공급의 75%, 전력 생산의 80%를 담당하는 핵심 시설</span>
+            </div>
+        </div>
+
+        <!-- Natanz -->
+        <div class="card-grid-2col">
+            <div class="damage-card animate-on-scroll">
+                <h4>나탄즈 핵시설 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Natanz)</span></h4>
+                <div class="card-grid">
+                    <span class="card-label">위치</span>
+                    <span class="card-value">이란 중부 나탄즈</span>
+                    <span class="card-label">공격일</span>
+                    <span class="card-value">2025년 6월 (1차), 2026년 3월 2일 (2차)</span>
+                    <span class="card-label">공격 주체</span>
+                    <span class="card-value">1차: 이스라엘, 2차: 미군</span>
+                    <span class="card-label">피해 내용</span>
+                    <span class="card-value">1차 공습으로 광범위한 손상 후, 2차 폭격으로 입구 건물 심각한 손상. 시설 접근 완전 불가 상태</span>
+                </div>
+            </div>
+
+            <!-- Fordow -->
+            <div class="damage-card animate-on-scroll">
+                <h4>포르도 우라늄 농축 시설 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Fordow)</span></h4>
+                <div class="card-grid">
+                    <span class="card-label">위치</span>
+                    <span class="card-value">이란 북부 (산 내부 지하시설)</span>
+                    <span class="card-label">공격일</span>
+                    <span class="card-value">2025년 6월</span>
+                    <span class="card-label">공격 주체</span>
+                    <span class="card-value">미군</span>
+                    <span class="card-label">피해 내용</span>
+                    <span class="card-value">B-2 스텔스 폭격기에서 투하된 GBU-57 벙커버스터 관통폭탄 및 토마호크 순항 미사일로 심각한 손상</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Isfahan -->
+        <div class="damage-card animate-on-scroll">
+            <h4>에스파한 핵시설 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Isfahan Nuclear Complex)</span></h4>
+            <div class="card-grid">
+                <span class="card-label">위치</span>
+                <span class="card-value">이란 중부 에스파한</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">광범위한 손상, 전쟁 이후 중요한 활동 거의 없음</span>
+            </div>
+        </div>
+
+        <h3>2.2 걸프 지역 에너지 시설 (이란 보복 공격)</h3>
+
+        <!-- Ras Laffan -->
+        <div class="damage-card critical animate-on-scroll">
+            <h4>라스 라판 LNG 복합시설 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Ras Laffan, 카타르)</span><span class="critical-badge">Critical</span></h4>
+            <div class="card-hero-numbers">
+                <div class="card-hero-stat">
+                    <span class="big-number cost-num">$260억</span>
+                    <span class="big-label">재건 비용</span>
+                </div>
+                <div class="card-hero-stat">
+                    <span class="big-number cost-num">$200억</span>
+                    <span class="big-label">수익 손실 (5년)</span>
+                </div>
+                <div class="card-hero-stat">
+                    <span class="big-number impact-num">17%</span>
+                    <span class="big-label">LNG 수출 차단</span>
+                </div>
+            </div>
+            <div class="card-grid">
+                <span class="card-label">위치</span>
+                <span class="card-value">카타르 페르시아만</span>
+                <span class="card-label">공격일</span>
+                <span class="card-value">2026년 3월 18~19일</span>
+                <span class="card-label">공격 주체</span>
+                <span class="card-value">이란</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">Train 4, Train 6 생산 설비 직접 타격. 카타르 LNG 수출 능력의 17% 차단 (연 1,280만 톤). Pearl GTL 시설 1개 열차 최소 1년 이상 운영 중단</span>
+                <span class="card-label">재건 기간</span>
+                <span class="card-value">3~5년</span>
+                <span class="card-label">영향</span>
+                <span class="card-value">중국, 한국, 이탈리아, 벨기에 등 장기 LNG 공급 계약에 불가항력 선언 가능성</span>
+            </div>
+        </div>
+
+        <!-- Gulf facilities table -->
+        <h4>기타 걸프 지역 피해 시설</h4>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>시설</th>
+                        <th>위치</th>
+                        <th>공격일</th>
+                        <th>피해 내용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="시설"><strong>라스 타누라 정유소</strong></td>
+                        <td data-label="위치">사우디아라비아</td>
+                        <td data-label="공격일">2026.03.02</td>
+                        <td data-label="피해">이란 드론 공격, 경미한 손상, 보안상 운영 중단</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>삼렉 정유소</strong></td>
+                        <td data-label="위치">사우디아라비아</td>
+                        <td data-label="공격일">2026.03.19</td>
+                        <td data-label="피해">이란 드론 충돌 손상 (엑손모빌 50% 소유)</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>루와이스 정유소</strong></td>
+                        <td data-label="위치">아부다비, UAE</td>
+                        <td data-label="공격일">2026.04.05 확인</td>
+                        <td data-label="피해">방공 요격 잔해로 다중 화재. 세계 4대 규모 (일일 922,000배럴)</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>미나 알-아흐마디</strong></td>
+                        <td data-label="위치">쿠웨이트</td>
+                        <td data-label="공격일">2026.04.03</td>
+                        <td data-label="피해">이란 드론 공격, 설비 화재 발생</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>KNPC/석유화학공사</strong></td>
+                        <td data-label="위치">쿠웨이트</td>
+                        <td data-label="공격일">-</td>
+                        <td data-label="피해">광범위한 손상, 화재 진압 진행 중</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>BAPCO 연료 저장시설</strong></td>
+                        <td data-label="위치">바레인</td>
+                        <td data-label="공격일">-</td>
+                        <td data-label="피해">이란 공습으로 연료 저장시설 피해</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>두깜/살랄라 시설</strong></td>
+                        <td data-label="위치">오만</td>
+                        <td data-label="공격일">2026.03</td>
+                        <td data-label="피해">이란 드론 공격, 최소 1개 연료 탱크 피해</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== 3. 교통 및 항만 ===== -->
+    <section id="transport" class="section">
+        <div class="section-header">
+            <div class="section-number">03</div>
+            <div class="section-icon icon-transport">&#9875;</div>
+            <h2>교통 및 항만 인프라 피해</h2>
+        </div>
+
+        <h3>3.1 항구 및 해군기지</h3>
+
+        <div class="damage-card critical animate-on-scroll">
+            <h4>반더 압바스 항구 및 해군기지 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Bandar Abbas)</span><span class="critical-badge">Critical</span></h4>
+            <div class="card-hero-numbers">
+                <div class="card-hero-stat">
+                    <span class="big-number cost-num">수십억$</span>
+                    <span class="big-label">재건 비용</span>
+                </div>
+                <div class="card-hero-stat">
+                    <span class="big-number impact-num">40+</span>
+                    <span class="big-label">시설 손상</span>
+                </div>
+            </div>
+            <div class="card-grid">
+                <span class="card-label">위치</span>
+                <span class="card-value">호르무즈 해협 인접, 이란 남동부</span>
+                <span class="card-label">공격일</span>
+                <span class="card-value">2026년 3월 초</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">위성 이미지에서 40개 이상 시설 손상 확인. IRIS Makran(이란 최초의 전진기지함) 침몰. 다수 선박 화재</span>
+                <span class="card-label">전략적 중요성</span>
+                <span class="card-value highlight">이란 최대 군항이자 호르무즈 해협 통제 핵심 거점</span>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>시설</th>
+                        <th>위치</th>
+                        <th>공격일</th>
+                        <th>피해 내용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="시설"><strong>차바하르 해군기지</strong></td>
+                        <td data-label="위치">이란 남동부 해안</td>
+                        <td data-label="공격일">2026.03.01</td>
+                        <td data-label="피해">미군 공격, 선박 및 건물 다수 파괴</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>콘아락 해군기지</strong></td>
+                        <td data-label="위치">이란 남동부</td>
+                        <td data-label="공격일">2026.03.01</td>
+                        <td data-label="피해">선박 및 건물 다수 파괴</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>제벨알리 항구</strong></td>
+                        <td data-label="위치">두바이, UAE</td>
+                        <td data-label="공격일">2026.03.01</td>
+                        <td data-label="피해">이란 미사일, 2개 지점 화재. 3월 12일 기본 인프라 무사, 물류량 감소</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>3.2 공항</h3>
+
+        <div class="card-grid-2col">
+            <div class="damage-card animate-on-scroll">
+                <h4>메흐라바드 국제공항 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(테헤란)</span></h4>
+                <div class="card-grid">
+                    <span class="card-label">공격일</span>
+                    <span class="card-value">2026년 3월 7일</span>
+                    <span class="card-label">공격 주체</span>
+                    <span class="card-value">이스라엘 공군</span>
+                    <span class="card-label">피해 내용</span>
+                    <span class="card-value">항공기 19대 파괴 (보잉 747 화물기 3대, Il-76 수송기 3대 포함). 활주로 및 격납고 손상</span>
+                </div>
+            </div>
+
+            <div class="damage-card animate-on-scroll">
+                <h4>시라즈 공항 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Shiraz)</span></h4>
+                <div class="card-grid">
+                    <span class="card-label">위치</span>
+                    <span class="card-value">이란 남부 시라즈</span>
+                    <span class="card-label">피해 내용</span>
+                    <span class="card-value">IRGC Sukhoi Su-22 2대, C-130 허큘레스 2대, Il-76 수송기 1대 파괴</span>
+                </div>
+            </div>
+        </div>
+
+        <h3>3.3 철도 및 교량</h3>
+
+        <p>2026년 4월 7일, 네타냐후 이스라엘 총리는 이란 내 <strong style="color: var(--accent-red);">8개 교량 파괴</strong>를 공식 확인했다.</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>시설</th>
+                        <th>위치</th>
+                        <th>피해 내용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="시설"><strong>카산 철도교</strong></td>
+                        <td data-label="위치">카산 (Kashan)</td>
+                        <td data-label="피해">철도 다리 파괴, 2명 사망 3명 부상</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>카라즈 철도시설</strong></td>
+                        <td data-label="위치">카라즈 (Karaj)</td>
+                        <td data-label="피해">철도 시설 파괴</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>가즈빈 철도시설</strong></td>
+                        <td data-label="위치">가즈빈 (Qazvin)</td>
+                        <td data-label="피해">철도 시설 피해</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>타브리즈-잔잔 고속도로 교량</strong></td>
+                        <td data-label="위치">타브리즈 외곽 약 90km</td>
+                        <td data-label="피해">고속도로 다리 파괴</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>테헤란 인근 교량</strong></td>
+                        <td data-label="위치">테헤란 근교</td>
+                        <td data-label="피해">IRGC 발사대 연결 인프라와 함께 파괴</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>기타 교량 (3개)</strong></td>
+                        <td data-label="위치">이란 각지</td>
+                        <td data-label="피해">세부 정보 미공개</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== 4. 군사 인프라 ===== -->
+    <section id="military" class="section">
+        <div class="section-header">
+            <div class="section-number">04</div>
+            <div class="section-icon icon-military">&#9760;</div>
+            <h2>군사 인프라 피해</h2>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>시설</th>
+                        <th>위치</th>
+                        <th>피해 내용</th>
+                        <th>재건 비용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="시설"><strong>에스파한 미사일 복합시설</strong></td>
+                        <td data-label="위치">에스파한주</td>
+                        <td data-label="피해">지하 시설, 미사일 발사대, 방어 체계, 통제 구조물, 레이더 시스템 파괴</td>
+                        <td data-label="비용">미상</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>IRGC 사령부 시설</strong></td>
+                        <td data-label="위치">테헤란 및 인근</td>
+                        <td data-label="피해">이슬람혁명수비대 사령부 파괴</td>
+                        <td data-label="비용">미상</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>알리 아크바르 무인기 기지</strong></td>
+                        <td data-label="위치">압박(Ahvaz), 후제스탄주</td>
+                        <td data-label="피해">활주로 파괴, 북동쪽 지역 심각한 피해</td>
+                        <td data-label="비용">미상</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>쿰 미사일 발사기지</strong></td>
+                        <td data-label="위치">쿰주</td>
+                        <td data-label="피해">미사일 발사대 파괴</td>
+                        <td data-label="비용">미상</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>THAAD 방어 체계 (미군)</strong></td>
+                        <td data-label="위치">UAE 루와이스/사데르</td>
+                        <td data-label="피해">루와이스 3개 건물, 사데르 4개 건물 손상. THAAD 배터리용 레이더 시스템 저장고 피해</td>
+                        <td data-label="비용" style="color: var(--accent-red); font-weight: 700;">약 3억 달러</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== 5. 통신 및 디지털 ===== -->
+    <section id="comm" class="section">
+        <div class="section-header">
+            <div class="section-number">05</div>
+            <div class="section-icon icon-comm">&#128225;</div>
+            <h2>통신 및 디지털 인프라 피해</h2>
+        </div>
+
+        <div class="damage-card animate-on-scroll">
+            <h4>이란 군사 통신 네트워크</h4>
+            <div class="card-grid">
+                <span class="card-label">피해 범위</span>
+                <span class="card-value">이란 전국</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">군사 통신망 광범위 파괴, 명령 및 통제(C2) 시스템 중단, 센서 네트워크 교란</span>
+            </div>
+        </div>
+
+        <div class="damage-card critical animate-on-scroll">
+            <h4>인터넷 및 기간통신 인프라<span class="critical-badge">Critical</span></h4>
+            <div class="card-hero-numbers">
+                <div class="card-hero-stat">
+                    <span class="big-number impact-num">37일+</span>
+                    <span class="big-label">인터넷 차단 기간</span>
+                </div>
+            </div>
+            <div class="card-grid">
+                <span class="card-label">차단 시작일</span>
+                <span class="card-value">2026년 3월 6일</span>
+                <span class="card-label">차단 기간</span>
+                <span class="card-value highlight">37일 이상 (역사상 최장 규모의 인터넷 차단)</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">국가 주도의 인터넷 완전 종료, 민간 통신 마비, 경제 활동 전면 중단</span>
+            </div>
+        </div>
+
+        <div class="damage-card animate-on-scroll">
+            <h4>데이터센터</h4>
+            <div class="card-grid">
+                <span class="card-label">피해 범위</span>
+                <span class="card-value">이란 포함 중동 지역</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value">데이터센터 파괴로 AI 인프라 및 클라우드 서비스 손상</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 6. 산업 인프라 ===== -->
+    <section id="industry" class="section">
+        <div class="section-header">
+            <div class="section-number">06</div>
+            <div class="section-icon icon-industry">&#9878;</div>
+            <h2>산업 인프라 피해</h2>
+        </div>
+
+        <blockquote>이스라엘 총리 네타냐후는 2026년 4월 3일, <strong style="color: var(--accent-red);">이란 철강 생산 능력의 70%가 파괴</strong>되었다고 발표했다.</blockquote>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>시설</th>
+                        <th>위치</th>
+                        <th>피해 내용</th>
+                        <th>재건 비용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="시설"><strong>후제스탄 제철소</strong><br><small style="color: var(--text-muted);">Khuzestan Steel</small></td>
+                        <td data-label="위치">압박(Ahvaz), 후제스탄주</td>
+                        <td data-label="피해">IRGC 부분 소유, 심각한 피해</td>
+                        <td data-label="비용" style="color: var(--accent-red);">수십억 달러 (6개월~1년)</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>모바라케 제철소</strong><br><small style="color: var(--text-muted);">Mobarakeh Steel</small></td>
+                        <td data-label="위치">에스파한</td>
+                        <td data-label="피해">IRGC 부분 소유, 심각한 피해, 전면 재구성 필요</td>
+                        <td data-label="비용" style="color: var(--accent-red);">수십억 달러</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>사바 제철소</strong><br><small style="color: var(--text-muted);">Saba Steel</small></td>
+                        <td data-label="위치">에스파한주</td>
+                        <td data-label="피해">2026년 3월 27일 공습으로 피해</td>
+                        <td data-label="비용">미상</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>카비르 제철소</strong><br><small style="color: var(--text-muted);">Kavir Steel</small></td>
+                        <td data-label="위치">에스파한주</td>
+                        <td data-label="피해">2026년 3월 28일 공습으로 피해</td>
+                        <td data-label="비용">미상</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><strong style="color: var(--accent-amber);">전략적 영향:</strong> 철강 생산 능력 파괴는 IRGC의 자금 조달 및 무기 생산 능력을 직접적으로 약화시키는 것을 목표로 한 것으로 분석됨.</p>
+    </section>
+
+    <!-- ===== 7. 수자원 ===== -->
+    <section id="water" class="section">
+        <div class="section-header">
+            <div class="section-number">07</div>
+            <div class="section-icon icon-water">&#128167;</div>
+            <h2>수자원 및 담수화 시설 피해</h2>
+        </div>
+
+        <div class="damage-card critical animate-on-scroll">
+            <h4>케시 섬 담수화 시설 <span style="color: var(--text-muted); font-weight:300; font-size:0.88rem;">(Qeshm Island)</span><span class="critical-badge">Critical</span></h4>
+            <div class="card-hero-numbers">
+                <div class="card-hero-stat">
+                    <span class="big-number impact-num">30개 마을</span>
+                    <span class="big-label">상수도 차단</span>
+                </div>
+            </div>
+            <div class="card-grid">
+                <span class="card-label">위치</span>
+                <span class="card-value">호르무즈 해협, 이란</span>
+                <span class="card-label">공격일</span>
+                <span class="card-value">2026년 3월 7일</span>
+                <span class="card-label">공격 주체</span>
+                <span class="card-value">미군</span>
+                <span class="card-label">피해 내용</span>
+                <span class="card-value highlight">완전 운영 중단. 30개 마을 상수도 공급 차단. 단기 복구 불가능</span>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>시설</th>
+                        <th>위치</th>
+                        <th>피해 내용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="시설"><strong>쿠웨이트 담수화 시설</strong></td>
+                        <td data-label="위치">쿠웨이트</td>
+                        <td data-label="피해">이란 보복 공격으로 피해</td>
+                    </tr>
+                    <tr>
+                        <td data-label="시설"><strong>바레인 담수화 시설</strong></td>
+                        <td data-label="위치">바레인</td>
+                        <td data-label="피해">이란 보복 공격으로 피해</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="disclaimer" style="border-color: rgba(0, 212, 255, 0.2); background: rgba(0, 212, 255, 0.02);">
+            <strong style="color: var(--accent-cyan);">인도적 영향:</strong> 담수화 시설 파괴는 중동의 만성적 물 부족 문제를 심각하게 악화시키고 있으며, 민간인에 대한 직접적인 인도적 위기를 초래하고 있다.
+        </div>
+    </section>
+
+    <!-- ===== 8. 재건 비용 ===== -->
+    <section id="cost" class="section">
+        <div class="section-header">
+            <div class="section-number">08</div>
+            <div class="section-icon icon-cost">&#128176;</div>
+            <h2>재건 비용 종합</h2>
+        </div>
+
+        <!-- Mermaid: 비용 구조 파이 차트 -->
+        <div class="mermaid-wrapper animate-on-scroll">
+            <h4>분야별 재건 비용 비중 (추정, 단위: 억 달러)</h4>
+            <pre class="mermaid">
+pie showData
+    "라스 라판 LNG ($260억)" : 260
+    "에너지 인프라 ($250억)" : 250
+    "사우스 파르스 ($26억)" : 26
+    "미군 장비 THAAD ($20억)" : 20
+    "철강 산업 (~$50억)" : 50
+    "기타 군사·통신·수자원" : 40
+            </pre>
+        </div>
+
+        <!-- Mermaid: 경제 파급 효과 흐름도 -->
+        <div class="mermaid-wrapper animate-on-scroll">
+            <h4>경제적 파급 효과 구조</h4>
+            <pre class="mermaid">
+flowchart TB
+    WAR["⚔️ 분쟁 발생\n2026.02.28"]
+
+    subgraph DIRECT["직접 피해"]
+        E1["에너지 시설 파괴\n40개+ 시설"]
+        E2["항만/교통 마비"]
+        E3["군사 인프라 손실"]
+        E4["산업 기반 붕괴\n철강 70%"]
+    end
+
+    subgraph SUPPLY["공급 충격"]
+        S1["석유 900만 배럴/일\n공급 차단"]
+        S2["글로벌 LNG 19%\n거래 영향"]
+        S3["호르무즈 해협\n통행 위협"]
+    end
+
+    subgraph ECON["경제적 결과"]
+        R1["유럽 에너지\n가격 63% 상승"]
+        R2["아랍국가 직접 피해\n$1,200억"]
+        R3["지역 GDP 손실\n$1,200~1,940억/월"]
+        R4["재건 비용\n$600억+"]
+    end
+
+    WAR --> DIRECT
+    DIRECT --> SUPPLY
+    SUPPLY --> ECON
+
+    E1 --> S1
+    E1 --> S2
+    E2 --> S3
+    S1 --> R1
+    S2 --> R1
+    S3 --> R2
+    DIRECT --> R4
+
+    style WAR fill:#3b1515,stroke:#ff4444,color:#fff
+    style DIRECT fill:#1e1b2e,stroke:#ff8c42,color:#fff
+    style SUPPLY fill:#1a2030,stroke:#f59e0b,color:#fff
+    style ECON fill:#1a1a2e,stroke:#ff4444,color:#fff
+    style E1 fill:#2a2010,stroke:#f59e0b,color:#e8e6e3
+    style E2 fill:#0f2530,stroke:#2dd4bf,color:#e8e6e3
+    style E3 fill:#2a1515,stroke:#ff4444,color:#e8e6e3
+    style E4 fill:#2a2510,stroke:#ffd700,color:#e8e6e3
+    style S1 fill:#2a2010,stroke:#f59e0b,color:#e8e6e3
+    style S2 fill:#0f2030,stroke:#4a9eff,color:#e8e6e3
+    style S3 fill:#0f2530,stroke:#2dd4bf,color:#e8e6e3
+    style R1 fill:#2a1515,stroke:#ff4444,color:#e8e6e3
+    style R2 fill:#2a1515,stroke:#ff4444,color:#e8e6e3
+    style R3 fill:#2a1515,stroke:#ff4444,color:#e8e6e3
+    style R4 fill:#2a1515,stroke:#ff4444,color:#e8e6e3
+            </pre>
+        </div>
+
+        <h3>8.1 분야별 재건 비용</h3>
+
+        <!-- Bar chart visualization -->
+        <div class="bar-chart">
+            <div class="bar-row animate-on-scroll">
+                <span class="bar-label">라스 라판 LNG</span>
+                <div class="bar-track">
+                    <div class="bar-fill fire" data-width style="--bar-w: 100%;">$260억</div>
+                </div>
+            </div>
+            <div class="bar-row animate-on-scroll">
+                <span class="bar-label">에너지 인프라 (중동 전역)</span>
+                <div class="bar-track">
+                    <div class="bar-fill gold" data-width style="--bar-w: 96%;">$250억</div>
+                </div>
+            </div>
+            <div class="bar-row animate-on-scroll">
+                <span class="bar-label">사우스 파르스 가스전</span>
+                <div class="bar-track">
+                    <div class="bar-fill teal" data-width style="--bar-w: 10%;">$26억</div>
+                </div>
+            </div>
+            <div class="bar-row animate-on-scroll">
+                <span class="bar-label">미군 장비 (THAAD 등)</span>
+                <div class="bar-track">
+                    <div class="bar-fill purple" data-width style="--bar-w: 7.7%;">$20억</div>
+                </div>
+            </div>
+            <div class="bar-row animate-on-scroll">
+                <span class="bar-label">이란 철강 산업</span>
+                <div class="bar-track">
+                    <div class="bar-fill blue" data-width style="--bar-w: 15%;">수십억$</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cost-card fire">
+            <div class="cost-row">
+                <span class="cost-label">에너지 인프라 (중동 전역, 40개+ 시설)</span>
+                <span class="cost-amount red">약 250억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">카타르 라스 라판 LNG (원래 건설 비용 기준)</span>
+                <span class="cost-amount red">약 260억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">사우스 파르스 가스전 (원래 건설 비용 기준)</span>
+                <span class="cost-amount red">약 26억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">미군 장비 피해 (THAAD 등, 초기 추정)</span>
+                <span class="cost-amount red">약 20억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">이란 철강 산업 (생산 능력 70% 파괴)</span>
+                <span class="cost-amount red">수십억 달러</span>
+            </div>
+        </div>
+
+        <h3>8.2 경제적 파급 효과</h3>
+
+        <div class="cost-card amber">
+            <div class="cost-row">
+                <span class="cost-label">전체 분쟁 비용 (군사비 + 경제손실)</span>
+                <span class="cost-amount orange">200억 ~ 450억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">아랍 국가 직접 피해액 (2026.03.31 기준)</span>
+                <span class="cost-amount orange">약 1,200억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">지역 GDP 손실 (1개월 기준, UNDP 추정)</span>
+                <span class="cost-amount orange">1,200억 ~ 1,940억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">카타르 연간 LNG 수익 손실 (5년간)</span>
+                <span class="cost-amount orange">약 200억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">글로벌 석유 공급 차단</span>
+                <span class="cost-amount orange">일일 900만 배럴</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">글로벌 LNG 거래 영향 (세계 LNG의 19%)</span>
+                <span class="cost-amount orange">연간 1,100억 m&sup3;</span>
+            </div>
+        </div>
+
+        <h3>8.3 일일 전쟁 비용</h3>
+
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem;">CSIS(전략국제문제연구소) 추정</p>
+
+        <div class="cost-card purple">
+            <div class="cost-row">
+                <span class="cost-label">6일차 기준</span>
+                <span class="cost-amount purple">약 113억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">12일차 기준</span>
+                <span class="cost-amount purple">약 165억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">2026.04.04 기준 총 군사비 (미국 및 동맹국)</span>
+                <span class="cost-amount purple">약 45억 달러</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">여름까지 총 비용 전망</span>
+                <span class="cost-amount purple">1,000억 달러 초과</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 9. 전망 ===== -->
+    <section id="outlook" class="section">
+        <div class="section-header">
+            <div class="section-number">09</div>
+            <div class="section-icon icon-outlook">&#128301;</div>
+            <h2>재건 과제 및 전망</h2>
+        </div>
+
+        <!-- Mermaid: 재건 기간 간트 차트 -->
+        <div class="mermaid-wrapper animate-on-scroll">
+            <h4>인프라 유형별 예상 재건 기간</h4>
+            <pre class="mermaid">
+gantt
+    title 재건 로드맵 (전쟁 종료 시점 기준)
+    dateFormat YYYY-MM
+    axisFormat %Y
+
+    section 에너지
+    정유소 · 가스전 복구       :energy1, 2026-07, 2029-07
+    LNG 플랜트 재건           :energy2, 2026-10, 2031-10
+
+    section 핵시설
+    핵시설 (정치적 조건부)     :crit, nuc1, 2027-01, 2032-01
+
+    section 교통
+    교량 · 철도 복구           :transport1, 2026-07, 2028-07
+    항만 시설 재건             :transport2, 2026-07, 2030-07
+
+    section 산업
+    철강 설비 교체             :ind1, 2026-07, 2029-07
+
+    section 생활 인프라
+    통신 인프라 복구           :comm1, 2026-07, 2028-01
+    담수화 시설 복구           :water1, 2026-07, 2028-07
+            </pre>
+        </div>
+
+        <h3>9.1 핵심 과제</h3>
+
+        <ol class="challenge-list">
+            <li class="animate-on-scroll">
+                <strong>부품 공급 병목</strong>
+                <ul>
+                    <li>대형 가스터빈 및 브레이즈드 알루미늄 열교환기는 전 세계 5개 회사만 생산</li>
+                    <li>평시에도 납품 기간이 2~3년 소요</li>
+                    <li>전쟁으로 인한 수요 급증으로 추가 지연 불가피</li>
+                </ul>
+            </li>
+            <li class="animate-on-scroll">
+                <strong>자본 및 기술 확보</strong>
+                <ul>
+                    <li>세계은행, IMF 등 국제금융기관의 대규모 자금 지원 필요</li>
+                    <li>일본, 한국 등의 고도 기술력 필요 (특히 LNG 플랜트)</li>
+                </ul>
+            </li>
+            <li class="animate-on-scroll">
+                <strong>국제 제재 문제</strong>
+                <ul>
+                    <li>이란에 대한 기존 국제 제재가 재건 자재/기술 도입의 장벽</li>
+                    <li>제재 해제 없이는 본격적 재건 시작 곤란</li>
+                </ul>
+            </li>
+            <li class="animate-on-scroll">
+                <strong>호르무즈 해협 안전 확보</strong>
+                <ul>
+                    <li>해상 운송 경로의 안전이 보장되지 않으면 재건 자재 운송 자체가 불가</li>
+                    <li>이란의 해협 통행료(선박당 200만 달러) 부과 제안</li>
+                </ul>
+            </li>
+            <li class="animate-on-scroll">
+                <strong>인도적 위기 대응</strong>
+                <ul>
+                    <li>담수화 시설 파괴로 인한 식수 부족</li>
+                    <li>전력 인프라 파괴로 인한 민간 생활 마비</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>9.2 예상 재건 기간</h3>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">인프라 유형</th>
+                        <th scope="col">예상 재건 기간</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="유형"><strong>에너지 시설</strong> (정유소, 가스전)</td>
+                        <td data-label="기간">3~5년</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>LNG 플랜트</strong></td>
+                        <td data-label="기간">3~5년</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>핵시설</strong></td>
+                        <td data-label="기간">5년 이상 (정치적 조건에 따라 변동)</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>교통 인프라</strong> (교량, 철도)</td>
+                        <td data-label="기간">1~3년</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>항만 시설</strong></td>
+                        <td data-label="기간">2~4년</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>담수화 시설</strong></td>
+                        <td data-label="기간">1~2년</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>통신 인프라</strong></td>
+                        <td data-label="기간">6개월~2년</td>
+                    </tr>
+                    <tr>
+                        <td data-label="유형"><strong>철강 산업</strong></td>
+                        <td data-label="기간">6개월~1년 (설비 교체 시 3년 이상)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== 10. 출처 ===== -->
+    <section id="sources" class="section" style="padding-bottom: 3rem;">
+        <div class="section-header">
+            <div class="section-number">10</div>
+            <h2>출처</h2>
+        </div>
+
+        <div class="sources-section">
+            <h4>에너지 인프라 관련</h4>
+            <ul class="source-list">
+                <li><a href="https://en.wikipedia.org/wiki/Economic_impact_of_the_2026_Iran_war" target="_blank">Economic impact of the 2026 Iran war - Wikipedia</a></li>
+                <li><a href="https://www.energypolicy.columbia.edu/us-israeli-attacks-on-iran-and-global-energy-impacts/" target="_blank">Center on Global Energy Policy - Live Updates</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/2026_South_Pars_field_attack" target="_blank">2026 South Pars field attack - Wikipedia</a></li>
+                <li><a href="https://www.rferl.org/a/iran-south-pars-gas-israel-attack/33710653.html" target="_blank">RFE/RL - Israel's Strike On South Pars</a></li>
+                <li><a href="https://www.insurancejournal.com/news/international/2026/04/07/864740.htm" target="_blank">InsuranceJournal - List of Gulf Energy Infrastructure Damaged</a></li>
+                <li><a href="https://www.bloomberg.com/news/articles/2026-03-25/here-s-a-list-of-gulf-energy-infrastructure-damaged-in-iran-war" target="_blank">Bloomberg - Gulf Energy Infrastructure Damaged List</a></li>
+                <li><a href="https://oilprice.com/Energy/Energy-General/The-Iran-War-Has-Already-Unleashed-a-25-Billion-Energy-Repair-Bill.html" target="_blank">The Iran War Has Already Unleashed a $25 Billion Energy Repair Bill - OilPrice.com</a></li>
+                <li><a href="https://www.lngindustry.com/liquefaction/20032026/qatarenergy-provides-production-update/" target="_blank">LNG Industry - QatarEnergy Production Update</a></li>
+                <li><a href="https://www.rigzone.com/news/qatarenergy_missile_strikes_may_cause_100b_revenue_loss-23-mar-2026-183271-article" target="_blank">Rigzone - QatarEnergy Missile Strikes Revenue Loss</a></li>
+                <li><a href="https://theconversation.com/why-the-damage-to-qatars-gas-infrastructure-could-push-costs-higher-for-years-to-come-278943" target="_blank">The Conversation - Damage to Qatar's Gas Infrastructure</a></li>
+                <li><a href="https://www.npr.org/2026/03/19/nx-s1-5750514/trump-iran-war-kharg-island-oil" target="_blank">NPR - Trump Iran War Kharg Island</a></li>
+            </ul>
+
+            <h4>교통/항만 관련</h4>
+            <ul class="source-list">
+                <li><a href="https://www.timesofisrael.com/newly-released-satellite-images-show-damage-dealt-in-iran-war-across-middle-east/" target="_blank">Times of Israel - Satellite Images Show Damage</a></li>
+                <li><a href="https://united24media.com/latest-news/satellite-images-show-irans-military-airlift-burning-c-130s-il-76s-and-747s-destroyed-16642" target="_blank">United24Media - Satellite Images of Aircraft Destruction</a></li>
+                <li><a href="https://www.jpost.com/middle-east/iran-news/article-892297" target="_blank">Jerusalem Post - Bridge Destruction</a></li>
+                <li><a href="https://www.aljazeera.com/news/2026/4/7/israel-warns-iranians-to-avoid-trains-as-trump-deadline-approaches" target="_blank">Al Jazeera - Israel Warns Iranians to Avoid Trains</a></li>
+                <li><a href="https://www.aljazeera.com/video/newsfeed/2026/3/1/video-smoke-seen-rising-from-dubais-main-shipping-port-after-iran-attack" target="_blank">Al Jazeera - Smoke at Dubai Port</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/2026_Strait_of_Hormuz_crisis" target="_blank">2026 Strait of Hormuz Crisis - Wikipedia</a></li>
+            </ul>
+
+            <h4>군사/통신/산업 관련</h4>
+            <ul class="source-list">
+                <li><a href="https://en.wikipedia.org/wiki/2026_Iran_war" target="_blank">2026 Iran War - Wikipedia</a></li>
+                <li><a href="https://commonslibrary.parliament.uk/research-briefings/cbp-10521/" target="_blank">US/Israel-Iran Conflict 2026 - House of Commons Library</a></li>
+                <li><a href="https://www.congress.gov/crs_external_products/R/PDF/R48887/R48887.1.pdf" target="_blank">Congressional Research Service - U.S. Conflict with Iran</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/2026_Internet_blackout_in_Iran" target="_blank">2026 Internet Blackout in Iran - Wikipedia</a></li>
+                <li><a href="https://www.jns.org/ai-lasers-and-satellites-technological-innovation-in-the-2026-iran-war/" target="_blank">JNS - AI, Lasers and Satellites in 2026 Iran War</a></li>
+                <li><a href="https://www.cnbc.com/2026/03/06/iran-war-data-centers.html" target="_blank">CNBC - Data Centers Become Military Targets</a></li>
+                <li><a href="https://www.euronews.com/2026/04/03/israels-pm-says-70-of-irans-steel-production-capacity-destroyed-hindering-weapons-producti" target="_blank">Euronews - 70% of Iran's Steel Production Destroyed</a></li>
+                <li><a href="https://www.timesofisrael.com/israel-bombs-2-irgc-linked-steel-plants-2-nuclear-facilities-as-iran-vows-revenge/" target="_blank">Times of Israel - Steel Plants and Nuclear Facilities Bombed</a></li>
+                <li><a href="https://dohanews.co/iran-destroys-u-s-made-radar-systems-in-the-middle-east/" target="_blank">Doha News - Iran Destroys U.S.-made Radar Systems</a></li>
+            </ul>
+
+            <h4>수자원/담수화 관련</h4>
+            <ul class="source-list">
+                <li><a href="https://www.wri.org/insights/iran-war-water-crisis-middle-east" target="_blank">World Resources Institute - Iran War Water Crisis</a></li>
+                <li><a href="https://www.atlanticcouncil.org/dispatches/attacks-on-desalination-plants-in-the-iran-war-forecast-a-dark-future/" target="_blank">Atlantic Council - Attacks on Desalination Plants</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/2026_Qeshm_Island_desalination_plant_attack" target="_blank">2026 Qeshm Island Desalination Plant Attack - Wikipedia</a></li>
+                <li><a href="https://www.aljazeera.com/news/2026/4/3/kuwait-desalination-plant-oil-refinery-hit-by-missile-and-drone-strikes" target="_blank">Al Jazeera - Kuwait Desalination and Oil Refinery Struck</a></li>
+            </ul>
+
+            <h4>비용 추정 관련</h4>
+            <ul class="source-list">
+                <li><a href="https://www.csis.org/analysis/iran-war-cost-estimate-update-113-billion-day-6-165-billion-day-12" target="_blank">CSIS - Iran War Cost Estimate Update</a></li>
+                <li><a href="https://www.irishtimes.com/world/middle-east/2026/04/07/hundreds-of-millions-of-dollars-a-day-us-counts-equipment-cost-of-iran-war/" target="_blank">Irish Times - US Counts Cost of War on Iran</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Cyberwarfare_during_the_2026_Iran_war" target="_blank">Cyberwarfare During the 2026 Iran War - Wikipedia</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ===== DISCLAIMER ===== -->
+    <div class="disclaimer">
+        <strong>면책 조항:</strong> 본 보고서는 공개된 뉴스 보도, 연구기관 보고서, 위키피디아 등을 기반으로 작성되었으며, 전쟁이 진행 중인 상황에서 정보의 정확성이 제한적일 수 있습니다. 재건 비용 추정치는 출처에 따라 상이하며, 향후 상당한 변동이 예상됩니다.
+    </div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <p>2025-2026 미국-이란 분쟁 인프라 피해 종합 보고서 &middot; 2026년 4월 8일 작성</p>
+</footer>
+
+<!-- ===== MERMAID JS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            darkMode: true,
+            background: '#101228',
+            primaryColor: '#1e293b',
+            primaryTextColor: '#e8e6e3',
+            primaryBorderColor: '#4a9eff',
+            lineColor: '#64748b',
+            secondaryColor: '#2a2010',
+            tertiaryColor: '#1a1a2e',
+            fontFamily: 'Noto Sans KR, sans-serif',
+            fontSize: '13px',
+            pie1: '#ff4444',
+            pie2: '#ff8c42',
+            pie3: '#2dd4bf',
+            pie4: '#4a9eff',
+            pie5: '#ffd700',
+            pie6: '#a855f7',
+            pie7: '#8b5cf6',
+            pieTitleTextSize: '16px',
+            pieTitleTextColor: '#e8e6e3',
+            pieSectionTextSize: '12px',
+            pieSectionTextColor: '#fff',
+            pieLegendTextSize: '13px',
+            pieLegendTextColor: '#a8a8a8',
+            pieStrokeColor: '#0c0e1a',
+            pieStrokeWidth: '2px',
+            pieOuterStrokeWidth: '0px',
+            cScale0: '#ff4444',
+            cScale1: '#ff8c42',
+            cScale2: '#f59e0b',
+            cScale3: '#2dd4bf',
+            cScale4: '#4a9eff',
+            cScale5: '#a855f7',
+            cScale6: '#8b5cf6',
+            cScale7: '#ffd700',
+            cScale8: '#00d4ff',
+            cScale9: '#ff6b6b',
+            cScale10: '#64748b',
+            cScale11: '#94a3b8'
+        },
+        flowchart: {
+            curve: 'basis',
+            padding: 20,
+            htmlLabels: true,
+            useMaxWidth: true
+        },
+        gantt: {
+            useMaxWidth: true,
+            barHeight: 25,
+            barGap: 6,
+            topPadding: 40,
+            sidePadding: 60,
+            fontSize: 12
+        },
+        timeline: {
+            useMaxWidth: true
+        }
+    });
+</script>
+
+<!-- ===== JS ===== -->
+<script>
+    // Scroll animations with IntersectionObserver
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                // Animate bar fills
+                const bars = entry.target.querySelectorAll('.bar-fill[data-width]');
+                bars.forEach(bar => bar.classList.add('animated'));
+                if (entry.target.classList.contains('bar-row')) {
+                    const bar = entry.target.querySelector('.bar-fill[data-width]');
+                    if (bar) bar.classList.add('animated');
+                }
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+    // Count-up animation for stat numbers
+    const countObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const target = parseInt(el.dataset.target);
+                const suffix = el.dataset.suffix || '+';
+                const duration = 1200;
+                const start = performance.now();
+
+                function tick(now) {
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = Math.round(eased * target);
+                    el.textContent = current + (progress >= 1 ? suffix : '');
+                    if (progress < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+                countObserver.unobserve(el);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-number[data-target]').forEach(el => countObserver.observe(el));
+
+    // Active nav highlighting
+    const sections = document.querySelectorAll('.section[id]');
+    const navLinks = document.querySelectorAll('.toc-nav a');
+
+    const navObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.toc-nav a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, { threshold: 0.2 });
+
+    sections.forEach(section => navObserver.observe(section));
+
+    // Scroll progress bar
+    const progressBar = document.getElementById('navProgress');
+    if (progressBar) {
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = progress + '%';
+        }, { passive: true });
+    }
+</script>
+
+</body>
+</html>

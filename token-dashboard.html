@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Token Usage Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e14;
+    --surface: #131820;
+    --surface2: #1a2030;
+    --border: #1e2a3a;
+    --text: #c5d0dc;
+    --text-dim: #5c6a7a;
+    --accent: #6c63ff;
+    --accent-glow: rgba(108, 99, 255, 0.3);
+    --green: #3ddc84;
+    --green-dim: rgba(61, 220, 132, 0.15);
+    --yellow: #ffc107;
+    --yellow-dim: rgba(255, 193, 7, 0.15);
+    --red: #ff5252;
+    --red-dim: rgba(255, 82, 82, 0.15);
+    --blue: #40c4ff;
+    --blue-dim: rgba(64, 196, 255, 0.15);
+    --orange: #ff9100;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .logo h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .logo span {
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(61, 220, 132, 0); }
+  }
+
+  .clock {
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: grid;
+    gap: 16px;
+  }
+
+  /* Top stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.blue::before { background: var(--blue); }
+
+  .stat-label {
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .stat-sub.green { color: var(--green); }
+  .stat-sub.yellow { color: var(--yellow); }
+  .stat-sub.red { color: var(--red); }
+
+  /* Main grid */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-body {
+    padding: 20px;
+  }
+
+  /* Usage bars */
+  .usage-item {
+    margin-bottom: 20px;
+  }
+
+  .usage-item:last-child { margin-bottom: 0; }
+
+  .usage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .usage-name {
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .usage-numbers {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .usage-numbers strong {
+    color: white;
+    font-weight: 600;
+  }
+
+  .bar-track {
+    height: 10px;
+    background: var(--surface2);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease;
+    position: relative;
+  }
+
+  .bar-fill.green { background: linear-gradient(90deg, #2ecc71, var(--green)); }
+  .bar-fill.yellow { background: linear-gradient(90deg, #f39c12, var(--yellow)); }
+  .bar-fill.red { background: linear-gradient(90deg, #e74c3c, var(--red)); }
+  .bar-fill.blue { background: linear-gradient(90deg, #2196f3, var(--blue)); }
+
+  .bar-warn {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    width: 2px;
+    background: var(--yellow);
+    opacity: 0.8;
+  }
+
+  /* Chart area */
+  .chart-container {
+    width: 100%;
+    height: 200px;
+    position: relative;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Prediction panel */
+  .prediction-card {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .prediction-card:last-child { margin-bottom: 0; }
+
+  .prediction-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .prediction-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .prediction-detail {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .prediction-card.warn { border-left-color: var(--yellow); }
+  .prediction-card.danger { border-left-color: var(--red); }
+  .prediction-card.safe { border-left-color: var(--green); }
+
+  /* Log table */
+  .log-table {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .log-row {
+    display: grid;
+    grid-template-columns: 120px 80px 90px 90px 1fr;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    align-items: center;
+  }
+
+  .log-row.header {
+    color: var(--text-dim);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+  }
+
+  .log-row .source {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .source.api { background: var(--blue-dim); color: var(--blue); }
+  .source.cli { background: var(--accent-glow); color: var(--accent); }
+
+  /* Settings modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    font-size: 14px;
+    color: white;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: white;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5a52e0;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+  }
+
+  .btn-danger {
+    background: var(--red-dim);
+    color: var(--red);
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* Add entry panel */
+  .add-entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .add-entry-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    padding: 16px 20px;
+  }
+
+  .add-entry-form .form-group {
+    margin: 0;
+  }
+
+  .add-entry-form input, .add-entry-form select {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Full width panel */
+  .full-width { grid-column: 1 / -1; }
+
+  /* Alert bar */
+  .alert-bar {
+    display: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
+  }
+
+  .alert-bar.warn {
+    display: flex;
+    background: var(--yellow-dim);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: var(--yellow);
+  }
+
+  .alert-bar.danger {
+    display: flex;
+    background: var(--red-dim);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+    color: var(--red);
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+  }
+
+  .empty-state .icon { font-size: 32px; margin-bottom: 12px; }
+  .empty-state p { font-size: 12px; margin-bottom: 16px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .main-grid { grid-template-columns: 1fr; }
+    .add-entry-form { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: relative;
+    cursor: help;
+  }
+
+  .tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid var(--border);
+  }
+
+  .tooltip:hover::after { opacity: 1; }
+
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--text-dim);
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-weight: 600;
+  }
+
+  .tab.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+  }
+
+  .tab:hover:not(.active) {
+    color: var(--text);
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">C</div>
+    <div>
+      <h1>Claude Token Monitor</h1>
+      <span>API + CLI Usage Dashboard</span>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="live-dot"></div>
+    <span class="clock" id="clock">--:--:--</span>
+    <button class="btn btn-ghost btn-sm" onclick="openSettings()">Settings</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportData()">Export</button>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Alert -->
+  <div class="alert-bar" id="alertBar"></div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card green">
+      <div class="stat-label">Today Input Tokens</div>
+      <div class="stat-value" id="todayInput">0</div>
+      <div class="stat-sub green" id="todayInputPct">0% of daily limit</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Today Output Tokens</div>
+      <div class="stat-value" id="todayOutput">0</div>
+      <div class="stat-sub green" id="todayOutputPct">0% of daily limit</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-label">Monthly Total</div>
+      <div class="stat-value" id="monthlyTotal">0</div>
+      <div class="stat-sub green" id="monthlyPct">0% of monthly limit</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Estimated Cost</div>
+      <div class="stat-value" id="totalCost">$0.00</div>
+      <div class="stat-sub" id="costDetail" style="color:var(--text-dim)">input + output</div>
+    </div>
+  </div>
+
+  <!-- Add entry -->
+  <div class="add-entry">
+    <div class="panel-header">
+      <div class="panel-title">+ Add Usage Entry</div>
+      <div class="tab-bar">
+        <button class="tab active" onclick="setAddMode('manual', this)">Manual</button>
+        <button class="tab" onclick="setAddMode('json', this)">Paste JSON</button>
+      </div>
+    </div>
+    <div id="manualForm">
+      <div class="add-entry-form">
+        <div class="form-group">
+          <label>Source</label>
+          <select id="entrySource">
+            <option value="api">API</option>
+            <option value="cli">Claude Code</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Input Tokens</label>
+          <input type="number" id="entryInput" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Output Tokens</label>
+          <input type="number" id="entryOutput" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <select id="entryModel">
+            <option value="opus-4">Opus 4</option>
+            <option value="sonnet-4">Sonnet 4</option>
+            <option value="haiku-4">Haiku 4</option>
+            <option value="opus-4.6">Opus 4.6</option>
+            <option value="sonnet-4.6">Sonnet 4.6</option>
+            <option value="haiku-4.5">Haiku 4.5</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="addEntry()">Add</button>
+      </div>
+    </div>
+    <div id="jsonForm" style="display:none;padding:16px 20px;">
+      <div class="form-group">
+        <label>API Response JSON (usage 필드를 자동 파싱합니다)</label>
+        <textarea id="jsonInput" style="width:100%;height:80px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:white;font-family:inherit;font-size:12px;padding:10px;resize:vertical;" placeholder='{"usage": {"input_tokens": 1234, "output_tokens": 567}}'></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="parseJsonEntry()">Parse & Add</button>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+    <!-- Usage bars -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Usage Breakdown</div>
+        <div class="tab-bar">
+          <button class="tab active" onclick="setView('daily', this)">Daily</button>
+          <button class="tab" onclick="setView('monthly', this)">Monthly</button>
+        </div>
+      </div>
+      <div class="panel-body" id="usageBars">
+        <!-- Dynamic -->
+      </div>
+    </div>
+
+    <!-- Predictions -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Limit Predictions</div>
+      </div>
+      <div class="panel-body" id="predictions">
+        <!-- Dynamic -->
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="panel full-width">
+      <div class="panel-header">
+        <div class="panel-title">Usage Trend (Last 7 Days)</div>
+      </div>
+      <div class="panel-body">
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="panel full-width">
+      <div class="panel-header">
+        <div class="panel-title">Usage Log</div>
+        <button class="btn btn-danger btn-sm" onclick="clearLogs()">Clear All</button>
+      </div>
+      <div class="panel-body" id="logBody" style="max-height:300px;overflow-y:auto;">
+        <!-- Dynamic -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Dashboard Settings</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeSettings()">X</button>
+    </div>
+    <div class="modal-body">
+      <h3 style="font-size:12px;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Daily Limits</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Input Tokens / Day</label>
+          <input type="number" id="setDailyInput" value="1000000">
+        </div>
+        <div class="form-group">
+          <label>Output Tokens / Day</label>
+          <input type="number" id="setDailyOutput" value="200000">
+        </div>
+      </div>
+      <h3 style="font-size:12px;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Monthly Limits</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Tokens / Month</label>
+          <input type="number" id="setMonthlyTotal" value="30000000">
+        </div>
+        <div class="form-group">
+          <label>Budget (USD) / Month</label>
+          <input type="number" id="setMonthlyBudget" value="100" step="0.01">
+        </div>
+      </div>
+      <h3 style="font-size:12px;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Pricing (per 1M tokens)</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Opus Input $</label>
+          <input type="number" id="priceOpusIn" value="15" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Opus Output $</label>
+          <input type="number" id="priceOpusOut" value="75" step="0.01">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sonnet Input $</label>
+          <input type="number" id="priceSonnetIn" value="3" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Sonnet Output $</label>
+          <input type="number" id="priceSonnetOut" value="15" step="0.01">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Haiku Input $</label>
+          <input type="number" id="priceHaikuIn" value="0.80" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Haiku Output $</label>
+          <input type="number" id="priceHaikuOut" value="4" step="0.01">
+        </div>
+      </div>
+      <h3 style="font-size:12px;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Alert Thresholds</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Warning at (%)</label>
+          <input type="number" id="setWarnPct" value="70" min="1" max="99">
+        </div>
+        <div class="form-group">
+          <label>Critical at (%)</label>
+          <input type="number" id="setCritPct" value="90" min="1" max="99">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ───
+const DEFAULT_SETTINGS = {
+  dailyInputLimit: 1_000_000,
+  dailyOutputLimit: 200_000,
+  monthlyTotalLimit: 30_000_000,
+  monthlyBudget: 100,
+  warnPct: 70,
+  critPct: 90,
+  pricing: {
+    'opus-4':    { input: 15,   output: 75 },
+    'opus-4.6':  { input: 15,   output: 75 },
+    'sonnet-4':  { input: 3,    output: 15 },
+    'sonnet-4.6':{ input: 3,    output: 15 },
+    'haiku-4':   { input: 0.80, output: 4 },
+    'haiku-4.5': { input: 0.80, output: 4 },
+  }
+};
+
+let settings = loadJSON('claude_dash_settings', DEFAULT_SETTINGS);
+let entries = loadJSON('claude_dash_entries', []);
+
+function loadJSON(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch { return fallback; }
+}
+
+function saveState() {
+  localStorage.setItem('claude_dash_settings', JSON.stringify(settings));
+  localStorage.setItem('claude_dash_entries', JSON.stringify(entries));
+}
+
+// ─── Helpers ───
+function today() { return new Date().toISOString().slice(0, 10); }
+function thisMonth() { return new Date().toISOString().slice(0, 7); }
+
+function fmt(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function getColor(pct) {
+  if (pct >= settings.critPct) return 'red';
+  if (pct >= settings.warnPct) return 'yellow';
+  return 'green';
+}
+
+function getModelPricing(model) {
+  return settings.pricing[model] || settings.pricing['sonnet-4'];
+}
+
+function calcCost(entry) {
+  const p = getModelPricing(entry.model);
+  return (entry.inputTokens * p.input + entry.outputTokens * p.output) / 1_000_000;
+}
+
+// ─── Data queries ───
+function todayEntries() {
+  const d = today();
+  return entries.filter(e => e.date === d);
+}
+
+function monthEntries() {
+  const m = thisMonth();
+  return entries.filter(e => e.date.startsWith(m));
+}
+
+function dailyAggregates(days = 7) {
+  const result = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const dayEntries = entries.filter(e => e.date === dateStr);
+    result.push({
+      date: dateStr,
+      label: dateStr.slice(5),
+      input: dayEntries.reduce((s, e) => s + e.inputTokens, 0),
+      output: dayEntries.reduce((s, e) => s + e.outputTokens, 0),
+      cost: dayEntries.reduce((s, e) => s + calcCost(e), 0),
+    });
+  }
+  return result;
+}
+
+// ─── Render ───
+function render() {
+  updateClock();
+  renderStats();
+  renderUsageBars();
+  renderPredictions();
+  renderLog();
+  renderChart();
+  renderAlert();
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('ko-KR', { hour12: false });
+}
+
+function renderStats() {
+  const tEntries = todayEntries();
+  const mEntries = monthEntries();
+
+  const tIn = tEntries.reduce((s, e) => s + e.inputTokens, 0);
+  const tOut = tEntries.reduce((s, e) => s + e.outputTokens, 0);
+  const mTotal = mEntries.reduce((s, e) => s + e.inputTokens + e.outputTokens, 0);
+  const cost = mEntries.reduce((s, e) => s + calcCost(e), 0);
+
+  const tInPct = (tIn / settings.dailyInputLimit * 100);
+  const tOutPct = (tOut / settings.dailyOutputLimit * 100);
+  const mPct = (mTotal / settings.monthlyTotalLimit * 100);
+
+  document.getElementById('todayInput').textContent = fmt(tIn);
+  document.getElementById('todayOutput').textContent = fmt(tOut);
+  document.getElementById('monthlyTotal').textContent = fmt(mTotal);
+  document.getElementById('totalCost').textContent = '$' + cost.toFixed(2);
+
+  const inSub = document.getElementById('todayInputPct');
+  inSub.textContent = tInPct.toFixed(1) + '% of daily limit';
+  inSub.className = 'stat-sub ' + getColor(tInPct);
+
+  const outSub = document.getElementById('todayOutputPct');
+  outSub.textContent = tOutPct.toFixed(1) + '% of daily limit';
+  outSub.className = 'stat-sub ' + getColor(tOutPct);
+
+  const mSub = document.getElementById('monthlyPct');
+  mSub.textContent = mPct.toFixed(1) + '% of monthly limit';
+  mSub.className = 'stat-sub ' + getColor(mPct);
+
+  const budgetPct = (cost / settings.monthlyBudget * 100);
+  document.getElementById('costDetail').textContent =
+    `${budgetPct.toFixed(1)}% of $${settings.monthlyBudget} budget`;
+  document.getElementById('costDetail').style.color =
+    budgetPct >= settings.critPct ? 'var(--red)' :
+    budgetPct >= settings.warnPct ? 'var(--yellow)' : 'var(--text-dim)';
+}
+
+let currentView = 'daily';
+
+function setView(view, el) {
+  currentView = view;
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderUsageBars();
+}
+
+function renderUsageBars() {
+  const container = document.getElementById('usageBars');
+
+  if (currentView === 'daily') {
+    const tEntries = todayEntries();
+    const apiEntries = tEntries.filter(e => e.source === 'api');
+    const cliEntries = tEntries.filter(e => e.source === 'cli');
+
+    const apiIn = apiEntries.reduce((s, e) => s + e.inputTokens, 0);
+    const apiOut = apiEntries.reduce((s, e) => s + e.outputTokens, 0);
+    const cliIn = cliEntries.reduce((s, e) => s + e.inputTokens, 0);
+    const cliOut = cliEntries.reduce((s, e) => s + e.outputTokens, 0);
+
+    const totalIn = apiIn + cliIn;
+    const totalOut = apiOut + cliOut;
+    const inPct = Math.min((totalIn / settings.dailyInputLimit) * 100, 100);
+    const outPct = Math.min((totalOut / settings.dailyOutputLimit) * 100, 100);
+
+    container.innerHTML = `
+      ${usageBar('Daily Input Tokens', totalIn, settings.dailyInputLimit, 'green')}
+      ${usageBar('Daily Output Tokens', totalOut, settings.dailyOutputLimit, 'blue')}
+      ${usageBar('API Input', apiIn, settings.dailyInputLimit, 'green')}
+      ${usageBar('API Output', apiOut, settings.dailyOutputLimit, 'blue')}
+      ${usageBar('CLI Input', cliIn, settings.dailyInputLimit, 'green')}
+      ${usageBar('CLI Output', cliOut, settings.dailyOutputLimit, 'blue')}
+    `;
+  } else {
+    const mEntries = monthEntries();
+    const mIn = mEntries.reduce((s, e) => s + e.inputTokens, 0);
+    const mOut = mEntries.reduce((s, e) => s + e.outputTokens, 0);
+    const mTotal = mIn + mOut;
+    const cost = mEntries.reduce((s, e) => s + calcCost(e), 0);
+
+    container.innerHTML = `
+      ${usageBar('Monthly Total', mTotal, settings.monthlyTotalLimit, 'yellow')}
+      ${usageBar('Monthly Input', mIn, settings.monthlyTotalLimit, 'green')}
+      ${usageBar('Monthly Output', mOut, settings.monthlyTotalLimit, 'blue')}
+      ${usageBar('Budget Used', cost, settings.monthlyBudget, 'red', true)}
+    `;
+  }
+}
+
+function usageBar(label, used, limit, color, isCurrency = false) {
+  const pct = Math.min((used / limit) * 100, 100);
+  const barColor = getColor(pct);
+  const dispUsed = isCurrency ? '$' + used.toFixed(2) : fmt(used);
+  const dispLimit = isCurrency ? '$' + limit.toFixed(2) : fmt(limit);
+  const warnPos = settings.warnPct;
+
+  return `
+    <div class="usage-item">
+      <div class="usage-header">
+        <span class="usage-name">${label}</span>
+        <span class="usage-numbers"><strong>${dispUsed}</strong> / ${dispLimit} (${pct.toFixed(1)}%)</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill ${barColor}" style="width:${pct}%"></div>
+        <div class="bar-warn" style="left:${warnPos}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPredictions() {
+  const container = document.getElementById('predictions');
+  const agg = dailyAggregates(7);
+  const activeDays = agg.filter(d => d.input + d.output > 0);
+
+  if (activeDays.length < 1) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📊</div>
+        <p>사용량 데이터를 입력하면 예측이 표시됩니다</p>
+      </div>
+    `;
+    return;
+  }
+
+  const avgDaily = activeDays.reduce((s, d) => s + d.input + d.output, 0) / activeDays.length;
+  const avgCost = activeDays.reduce((s, d) => s + d.cost, 0) / activeDays.length;
+  const mEntries = monthEntries();
+  const mUsed = mEntries.reduce((s, e) => s + e.inputTokens + e.outputTokens, 0);
+  const mCost = mEntries.reduce((s, e) => s + calcCost(e), 0);
+  const remaining = settings.monthlyTotalLimit - mUsed;
+  const budgetRemaining = settings.monthlyBudget - mCost;
+
+  const daysToLimit = avgDaily > 0 ? Math.floor(remaining / avgDaily) : Infinity;
+  const daysToBudget = avgCost > 0 ? Math.floor(budgetRemaining / avgCost) : Infinity;
+
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = daysInMonth - now.getDate();
+
+  const limitDate = new Date(now);
+  limitDate.setDate(limitDate.getDate() + daysToLimit);
+
+  const budgetDate = new Date(now);
+  budgetDate.setDate(budgetDate.getDate() + daysToBudget);
+
+  const projectedMonthly = avgDaily * daysInMonth;
+  const projectedCost = avgCost * daysInMonth;
+
+  const limitClass = daysToLimit <= 3 ? 'danger' : daysToLimit <= 7 ? 'warn' : 'safe';
+  const budgetClass = daysToBudget <= 3 ? 'danger' : daysToBudget <= 7 ? 'warn' : 'safe';
+
+  container.innerHTML = `
+    <div class="prediction-card ${limitClass}">
+      <div class="prediction-title">토큰 한도 도달 예상</div>
+      <div class="prediction-value">${daysToLimit === Infinity ? '∞' : daysToLimit + '일 후'}</div>
+      <div class="prediction-detail">
+        ${daysToLimit === Infinity ? '사용량 없음' :
+          limitDate.toLocaleDateString('ko-KR') + ' · 잔여 ' + fmt(remaining) + ' tokens'}
+      </div>
+    </div>
+    <div class="prediction-card ${budgetClass}">
+      <div class="prediction-title">예산 소진 예상</div>
+      <div class="prediction-value">${daysToBudget === Infinity ? '∞' : daysToBudget + '일 후'}</div>
+      <div class="prediction-detail">
+        ${daysToBudget === Infinity ? '비용 없음' :
+          budgetDate.toLocaleDateString('ko-KR') + ' · 잔여 $' + budgetRemaining.toFixed(2)}
+      </div>
+    </div>
+    <div class="prediction-card">
+      <div class="prediction-title">일 평균 사용량</div>
+      <div class="prediction-value">${fmt(Math.round(avgDaily))}</div>
+      <div class="prediction-detail">일 평균 비용 $${avgCost.toFixed(2)}</div>
+    </div>
+    <div class="prediction-card ${projectedMonthly > settings.monthlyTotalLimit ? 'danger' : 'safe'}">
+      <div class="prediction-title">이번 달 예상 총량</div>
+      <div class="prediction-value">${fmt(Math.round(projectedMonthly))}</div>
+      <div class="prediction-detail">
+        예상 비용 $${projectedCost.toFixed(2)}
+        ${projectedMonthly > settings.monthlyTotalLimit ? ' ⚠ 한도 초과 예상' : ' ✓ 한도 내'}
+      </div>
+    </div>
+  `;
+}
+
+function renderLog() {
+  const container = document.getElementById('logBody');
+  const recent = [...entries].reverse().slice(0, 50);
+
+  if (recent.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📝</div>
+        <p>아직 기록된 사용량이 없습니다.<br>위에서 수동으로 추가하거나 API 응답 JSON을 붙여넣으세요.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <div class="log-row header">
+      <span>Time</span><span>Source</span><span>Input</span><span>Output</span><span>Model / Cost</span>
+    </div>
+  `;
+
+  recent.forEach(e => {
+    const cost = calcCost(e);
+    const time = e.time || e.date;
+    html += `
+      <div class="log-row">
+        <span style="color:var(--text-dim)">${time}</span>
+        <span><span class="source ${e.source}">${e.source.toUpperCase()}</span></span>
+        <span style="color:var(--green)">${fmt(e.inputTokens)}</span>
+        <span style="color:var(--blue)">${fmt(e.outputTokens)}</span>
+        <span style="color:var(--text-dim)">${e.model} · $${cost.toFixed(4)}</span>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function renderChart() {
+  const canvas = document.getElementById('trendChart');
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = 400;
+
+  const agg = dailyAggregates(7);
+  const maxVal = Math.max(...agg.map(d => d.input + d.output), 1);
+
+  const pad = { top: 30, right: 20, bottom: 40, left: 70 };
+  const w = canvas.width - pad.left - pad.right;
+  const h = canvas.height - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (h / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + w, y);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '20px JetBrains Mono, monospace';
+    ctx.textAlign = 'right';
+    const val = maxVal - (maxVal / 4) * i;
+    ctx.fillText(fmt(Math.round(val)), pad.left - 10, y + 6);
+  }
+
+  const barW = w / agg.length * 0.6;
+  const gap = w / agg.length;
+
+  agg.forEach((d, i) => {
+    const x = pad.left + gap * i + gap * 0.2;
+    const total = d.input + d.output;
+    const totalH = (total / maxVal) * h;
+    const inputH = (d.input / maxVal) * h;
+    const outputH = (d.output / maxVal) * h;
+
+    // Output (top)
+    ctx.fillStyle = 'rgba(64, 196, 255, 0.7)';
+    ctx.beginPath();
+    ctx.roundRect(x, pad.top + h - totalH, barW, outputH, [4, 4, 0, 0]);
+    ctx.fill();
+
+    // Input (bottom)
+    ctx.fillStyle = 'rgba(61, 220, 132, 0.7)';
+    ctx.beginPath();
+    ctx.roundRect(x, pad.top + h - inputH, barW, inputH, [0, 0, 4, 4]);
+    ctx.fill();
+
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '20px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(d.label, x + barW / 2, pad.top + h + 28);
+
+    // Value on top
+    if (total > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '18px JetBrains Mono, monospace';
+      ctx.fillText(fmt(total), x + barW / 2, pad.top + h - totalH - 8);
+    }
+  });
+
+  // Limit line
+  const limitY = pad.top + h - (settings.dailyInputLimit / maxVal) * h;
+  if (limitY > pad.top && limitY < pad.top + h) {
+    ctx.strokeStyle = 'rgba(255, 82, 82, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, limitY);
+    ctx.lineTo(pad.left + w, limitY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = 'rgba(255, 82, 82, 0.7)';
+    ctx.font = '18px JetBrains Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('Daily Limit', pad.left + 4, limitY - 6);
+  }
+
+  // Legend
+  ctx.fillStyle = 'rgba(61, 220, 132, 0.7)';
+  ctx.fillRect(pad.left, pad.top - 20, 12, 12);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '18px JetBrains Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('Input', pad.left + 18, pad.top - 10);
+
+  ctx.fillStyle = 'rgba(64, 196, 255, 0.7)';
+  ctx.fillRect(pad.left + 80, pad.top - 20, 12, 12);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText('Output', pad.left + 98, pad.top - 10);
+}
+
+function renderAlert() {
+  const bar = document.getElementById('alertBar');
+  const tEntries = todayEntries();
+  const tIn = tEntries.reduce((s, e) => s + e.inputTokens, 0);
+  const tOut = tEntries.reduce((s, e) => s + e.outputTokens, 0);
+  const inPct = (tIn / settings.dailyInputLimit) * 100;
+  const outPct = (tOut / settings.dailyOutputLimit) * 100;
+  const maxPct = Math.max(inPct, outPct);
+
+  if (maxPct >= settings.critPct) {
+    bar.className = 'alert-bar danger';
+    bar.innerHTML = `⚠ 일일 토큰 한도의 ${maxPct.toFixed(1)}%에 도달했습니다! 사용량을 줄이거나 내일까지 기다려주세요.`;
+  } else if (maxPct >= settings.warnPct) {
+    bar.className = 'alert-bar warn';
+    bar.innerHTML = `⚡ 일일 토큰 한도의 ${maxPct.toFixed(1)}%를 사용 중입니다. 속도를 조절해주세요.`;
+  } else {
+    bar.className = 'alert-bar';
+  }
+}
+
+// ─── Actions ───
+function addEntry() {
+  const source = document.getElementById('entrySource').value;
+  const inputTokens = parseInt(document.getElementById('entryInput').value) || 0;
+  const outputTokens = parseInt(document.getElementById('entryOutput').value) || 0;
+  const model = document.getElementById('entryModel').value;
+
+  if (inputTokens === 0 && outputTokens === 0) return;
+
+  const now = new Date();
+  entries.push({
+    date: today(),
+    time: now.toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+    source,
+    inputTokens,
+    outputTokens,
+    model,
+    timestamp: now.getTime(),
+  });
+
+  saveState();
+  render();
+
+  document.getElementById('entryInput').value = '';
+  document.getElementById('entryOutput').value = '';
+}
+
+function parseJsonEntry() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  if (!raw) return;
+
+  try {
+    const data = JSON.parse(raw);
+    const usage = data.usage || data;
+    const inputTokens = usage.input_tokens || usage.inputTokens || 0;
+    const outputTokens = usage.output_tokens || usage.outputTokens || 0;
+    const model = data.model || document.getElementById('entryModel').value;
+
+    // Normalize model name
+    let normModel = 'sonnet-4';
+    if (model.includes('opus')) normModel = model.includes('4.6') ? 'opus-4.6' : 'opus-4';
+    else if (model.includes('haiku')) normModel = model.includes('4.5') ? 'haiku-4.5' : 'haiku-4';
+    else if (model.includes('sonnet')) normModel = model.includes('4.6') ? 'sonnet-4.6' : 'sonnet-4';
+
+    const now = new Date();
+    entries.push({
+      date: today(),
+      time: now.toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      source: 'api',
+      inputTokens,
+      outputTokens,
+      model: normModel,
+      timestamp: now.getTime(),
+    });
+
+    saveState();
+    render();
+    document.getElementById('jsonInput').value = '';
+  } catch (err) {
+    alert('JSON 파싱 오류: ' + err.message);
+  }
+}
+
+function setAddMode(mode, el) {
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('manualForm').style.display = mode === 'manual' ? 'block' : 'none';
+  document.getElementById('jsonForm').style.display = mode === 'json' ? 'block' : 'none';
+}
+
+function clearLogs() {
+  if (confirm('모든 사용량 기록을 삭제하시겠습니까?')) {
+    entries = [];
+    saveState();
+    render();
+  }
+}
+
+function exportData() {
+  const data = {
+    settings,
+    entries,
+    exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `claude-token-usage-${today()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Settings ───
+function openSettings() {
+  document.getElementById('setDailyInput').value = settings.dailyInputLimit;
+  document.getElementById('setDailyOutput').value = settings.dailyOutputLimit;
+  document.getElementById('setMonthlyTotal').value = settings.monthlyTotalLimit;
+  document.getElementById('setMonthlyBudget').value = settings.monthlyBudget;
+  document.getElementById('setWarnPct').value = settings.warnPct;
+  document.getElementById('setCritPct').value = settings.critPct;
+  document.getElementById('priceOpusIn').value = settings.pricing['opus-4'].input;
+  document.getElementById('priceOpusOut').value = settings.pricing['opus-4'].output;
+  document.getElementById('priceSonnetIn').value = settings.pricing['sonnet-4'].input;
+  document.getElementById('priceSonnetOut').value = settings.pricing['sonnet-4'].output;
+  document.getElementById('priceHaikuIn').value = settings.pricing['haiku-4'].input;
+  document.getElementById('priceHaikuOut').value = settings.pricing['haiku-4'].output;
+  document.getElementById('settingsModal').classList.add('active');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('active');
+}
+
+function saveSettings() {
+  settings.dailyInputLimit = parseInt(document.getElementById('setDailyInput').value);
+  settings.dailyOutputLimit = parseInt(document.getElementById('setDailyOutput').value);
+  settings.monthlyTotalLimit = parseInt(document.getElementById('setMonthlyTotal').value);
+  settings.monthlyBudget = parseFloat(document.getElementById('setMonthlyBudget').value);
+  settings.warnPct = parseInt(document.getElementById('setWarnPct').value);
+  settings.critPct = parseInt(document.getElementById('setCritPct').value);
+
+  const opusIn = parseFloat(document.getElementById('priceOpusIn').value);
+  const opusOut = parseFloat(document.getElementById('priceOpusOut').value);
+  const sonnetIn = parseFloat(document.getElementById('priceSonnetIn').value);
+  const sonnetOut = parseFloat(document.getElementById('priceSonnetOut').value);
+  const haikuIn = parseFloat(document.getElementById('priceHaikuIn').value);
+  const haikuOut = parseFloat(document.getElementById('priceHaikuOut').value);
+
+  settings.pricing['opus-4'] = { input: opusIn, output: opusOut };
+  settings.pricing['opus-4.6'] = { input: opusIn, output: opusOut };
+  settings.pricing['sonnet-4'] = { input: sonnetIn, output: sonnetOut };
+  settings.pricing['sonnet-4.6'] = { input: sonnetIn, output: sonnetOut };
+  settings.pricing['haiku-4'] = { input: haikuIn, output: haikuOut };
+  settings.pricing['haiku-4.5'] = { input: haikuIn, output: haikuOut };
+
+  saveState();
+  closeSettings();
+  render();
+}
+
+// ─── Demo data for first visit ───
+function addDemoData() {
+  if (entries.length > 0) return;
+
+  const now = new Date();
+  const models = ['opus-4.6', 'sonnet-4.6', 'haiku-4.5'];
+  const sources = ['api', 'cli'];
+
+  for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - dayOffset);
+    const dateStr = d.toISOString().slice(0, 10);
+
+    const numEntries = 3 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < numEntries; i++) {
+      const model = models[Math.floor(Math.random() * models.length)];
+      const source = sources[Math.floor(Math.random() * sources.length)];
+      const inputScale = model.includes('opus') ? 50000 : model.includes('sonnet') ? 20000 : 5000;
+      const outputScale = model.includes('opus') ? 8000 : model.includes('sonnet') ? 4000 : 2000;
+
+      entries.push({
+        date: dateStr,
+        time: `${String(9 + Math.floor(Math.random() * 10)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+        source,
+        inputTokens: Math.floor(Math.random() * inputScale) + 1000,
+        outputTokens: Math.floor(Math.random() * outputScale) + 200,
+        model,
+        timestamp: d.getTime() + Math.random() * 86400000,
+      });
+    }
+  }
+
+  saveState();
+}
+
+// ─── Init ───
+addDemoData();
+render();
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+  updateClock();
+  renderStats();
+  renderAlert();
+}, 1000);
+
+setInterval(render, 30000);
+
+// Resize handler
+window.addEventListener('resize', () => renderChart());
+</script>
+</body>
+</html>
