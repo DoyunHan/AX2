@@ -104,12 +104,12 @@ def write_summary(rows: list[dict], path: Path):
     md += "\n\n## 컬럼 설명\n\n"
     md += "- **trades**: 발생한 매매 수\n"
     md += "- **win_rate(%)**: 수익 거래 비율\n"
-    md += "- **avg_ret(%)**: 거래당 평균 순수익률 (수수료 차감 후)\n"
-    md += "- **total_ret(%)**: 누적 수익률 (매 거래에 동일 비중 100% 투입 가정)\n"
+    md += "- **expect/trade(%)**: 거래당 평균 순수익률 (수수료 차감 후) — 헤드라인 엣지\n"
+    md += "- **win_avg(%) / loss_avg(%)**: 승·패 거래의 평균 수익/손실\n"
     md += "- **PF (Profit Factor)**: 총 이익 / 총 손실. 1.0 이상이면 흑자, 1.5+ 양호, 2.0+ 우수\n"
-    md += "- **MDD(%)**: 최대 낙폭\n"
-    md += "- **Sharpe**: 거래별 수익률의 평균/표준편차 (연환산 아님, 거래 간 비교용)\n"
+    md += "- **Sharpe**: 거래당 수익률의 평균/표준편차 (연환산 아님, 거래 간 비교용)\n"
     md += "- **hold_days**: 평균 보유일\n"
+    md += "- **total_ret(%) / MDD(%)**: 직렬 단일 포지션 가정 누적 수익·최대 낙폭. 단일 포지션(인덱스) 백테스트에서만 의미. 다중 종목 동시 거래에는 부적합.\n"
     path.write_text(md, encoding="utf-8")
     print("\n" + md)
 

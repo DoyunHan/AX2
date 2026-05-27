@@ -134,12 +134,27 @@ def build_stock_panel(market: str = "krx", verbose: bool = True) -> dict[str, pd
         if verbose and (i + 1) % 10 == 0:
             print(f"  ...{i+1}/{len(dates)} ({len(by_stock)} stocks so far)")
     panels = {}
+    dropped_corporate_action = 0
     for code, rows in by_stock.items():
         df = pd.DataFrame(rows).set_index("Date").sort_index()
-        # Filter junk: must have valid OHLC
+        # Drop rows with NaN or zero OHLC (휴장/거래정지)
         df = df.dropna(subset=["Open", "High", "Low", "Close"])
-        if len(df) >= 10:  # need minimum data
+        df = df[(df["Open"] > 0) & (df["High"] > 0) & (df["Low"] > 0) & (df["Close"] > 0)]
+        # Drop days where overnight gap exceeds ±50% — almost certainly stock
+        # split / reverse split / corporate action (price limit is ±30%/day, so
+        # a clean intraday move is bounded by 30%; even with extreme gap it
+        # shouldn't double the price).
+        if len(df) >= 2:
+            prev_close = df["Close"].shift(1)
+            overnight_ratio = (df["Open"] / prev_close).fillna(1.0)
+            bad = (overnight_ratio < 0.5) | (overnight_ratio > 2.0)
+            if bad.any():
+                dropped_corporate_action += int(bad.sum())
+                df = df[~bad]
+        if len(df) >= 10:
             panels[code] = df
+    if verbose and dropped_corporate_action:
+        print(f"  dropped {dropped_corporate_action} rows from suspected corporate actions")
     if verbose:
         print(f"Built panels for {len(panels)} stocks "
               f"(skipped {weekend_count} non-trading dates)")
