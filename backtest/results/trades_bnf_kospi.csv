@@ -1,0 +1,9 @@
+entry_date,entry_price,exit_date,exit_price,reason,code,name
+2020-03-02,1997.03,2020-03-16,1714.86,holding_limit,ks11,KS11
+2020-03-24,1523.69,2020-04-06,1791.88,disparity_recovered,ks11,KS11
+2022-01-26,2729.75,2022-02-14,2704.48,holding_limit,ks11,KS11
+2022-06-21,2402.99,2022-07-05,2341.78,holding_limit,ks11,KS11
+2022-09-27,2224.39,2022-10-13,2162.87,holding_limit,ks11,KS11
+2024-08-06,2533.34,2024-08-21,2701.13,holding_limit,ks11,KS11
+2025-04-08,2381.2,2025-04-22,2486.64,holding_limit,ks11,KS11
+2026-04-01,5330.04,2026-04-07,5494.78,disparity_recovered,ks11,KS11
