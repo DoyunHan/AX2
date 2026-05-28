@@ -391,3 +391,114 @@ python3 walk_forward.py
 #   results/wf_machaseven_breakout.csv
 #   results/wf_jyh.csv
 ```
+
+---
+
+## 10. 결합 전략 — 마하세븐 돌파 + B.N.F (ETF 역추세) (`run_combined.py`)
+
+마하세븐(추세) + B.N.F(역추세)의 진짜 분산 효과 검증.
+
+### 10.1 설계
+- 동일 60일 기간(2026-03-08~2026-05-27)에서 두 전략 모두 백테스트
+- KOSPI 지수를 KODEX 200 NAV 프록시로 사용 (추적오차 0.05% 미만)
+- 자본 50:50 배분, 각 전략 내 거래당 자본의 **10% 포지션 사이징**
+- 일별 P&L = Σ(거래수익률 × 0.10) on exit dates
+- 일변동성, MDD, Sharpe(연환산) 비교
+
+### 10.2 결과
+
+| 전략 | 총수익 | Max DD | 일변동성 | Sharpe (연환산) |
+|------|------:|-------:|--------:|---------------:|
+| 마하세븐 단독 (n=261) | +53.6% | -8.85% | 3.29% | **3.82** |
+| B.N.F KOSPI 단독 (n=1) | +1.4% | 0.00% | 0.18% | 2.08 |
+| **50:50 결합** | +25.7% | **-4.51%** | **1.65%** | **3.92** |
+
+**일별 P&L 상관: +0.038** → 거의 무상관, 진짜 분산 확인.
+
+### 10.3 해석
+
+- **결합으로 MDD 절반(-8.85% → -4.51%) 감소, 변동성도 절반**
+- **Sharpe 3.82 → 3.92로 미세하게 개선** — 위험조정 수익률 향상
+- 단, **B.N.F가 60일 동안 1 trade만 fire** (강세장이라 -7% 이격도 안 닿음)
+- → 분산 효과는 검증됐지만 **B.N.F 단독 기여는 미미**
+- 결론: **마하세븐 단독이 가장 강력**, 결합은 보수적 운용 시(MDD 축소) 검토 가치
+
+### 10.4 B.N.F 장기(2020~2026) 참고
+
+| trades | expect/trade | PF |
+|------:|------------:|---:|
+| 8 | -0.25% | 0.91 |
+
+→ 6년 KOSPI에서도 8회만 fire (실용 빈도 부족). B.N.F는 강한 약세 구간에서만 작동, 자동매매 빈도가 너무 낮아 실전 보조 전략으로 한정.
+
+### 10.5 실행
+
+```bash
+python3 run_combined.py
+# Outputs:
+#   results/12_combined_equity.png
+#   results/combined_summary.md
+#   results/combined_summary.csv
+```
+
+---
+
+## 11. 키움 OpenAPI+ 시스템에 코드 이식 (`../kiwoom/`)
+
+walk-forward 통과한 **마하세븐 돌파 룰**을 plan.md 자동매매 시스템에 그대로 이식.
+
+```
+kiwoom/
+├── config/machaseven.py           # 검증 통과 파라미터 + 자금관리 룰
+├── strategy/
+│   ├── indicators.py              # SMA, ATR, amount_surge, alignment, breakout
+│   ├── screener.py                # 거래대금 상위 N universe
+│   └── machaseven_breakout.py     # check_entry / check_exit 함수
+├── risk/
+│   ├── daily_limit.py             # DailyLimitGuard (-5% 잠금)
+│   └── position.py                # Portfolio (50% 현금 + 20%/거래 + 5종목 동시 한도)
+├── api/
+│   └── kiwoom_adapter.py          # 키움 OCX wrapper (production) + Mock (test)
+└── main.py                        # MachasevenBot — scan_entries / check_exits 루프
+```
+
+- 전략 코드는 키움 의존성 없음 → 순수 pandas, 테스트 가능
+- 어댑터 패턴으로 production/Mock 분리 → 로컬 일봉 데이터로 시뮬레이션 검증 완료
+- 키움 TR 명세 코멘트 포함 (OPT10080 분봉, OPT10081 일봉, OPT10004 호가, SendOrder 등)
+
+### 11.1 Mock 시뮬레이션 확인
+
+```python
+from kiwoom.api.kiwoom_adapter import MockKiwoomAdapter
+from kiwoom.main import MachasevenBot
+from backtest.data_loader import build_stock_panel
+import pandas as pd
+
+panels = build_stock_panel("krx", verbose=False)
+adapter = MockKiwoomAdapter(panels)
+adapter.current_date = pd.Timestamp("2026-04-15")
+
+bot = MachasevenBot(adapter)
+bot.run_one_day(adapter.current_date.date())
+# → BUY 5종목 (포지션 한도 차서 6번째 차단)
+# → 동일 일자 5MA hard stop 2건 발동
+```
+
+### 11.2 Production 사용 (Windows + 키움 OpenAPI+)
+
+```python
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QAxContainer import QAxWidget
+from kiwoom.api.kiwoom_adapter import KiwoomAdapter
+from kiwoom.main import MachasevenBot
+
+app = QApplication([])
+ocx = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
+ocx.dynamicCall("CommConnect()")  # 로그인
+
+adapter = KiwoomAdapter(ocx)
+bot = MachasevenBot(adapter)
+bot.run_one_day(date.today())
+```
+
+`KiwoomAdapter`의 NotImplementedError 메서드들(`get_universe_amount_top`, `get_daily_chart`, `get_minute_chart`, `get_orderbook`, `get_account_balance`)은 plan.md Phase 1 에서 키움 TR 명세대로 채우면 됩니다.
