@@ -298,3 +298,96 @@ python3 run_advanced.py
 #   results/machaseven_breakout_reasons.csv
 python3 plot_advanced.py
 ```
+
+---
+
+## 9. Walk-forward 검증 (`walk_forward.py`)
+
+그리드 서치 결과가 in-sample 과적합이 아닌지 검증.
+
+### 9.1 설계
+
+- 기간: 2026-03-30 ~ 2026-05-27 (시그널 시작 후 ~40거래일)
+- Train 25일 / Test 12일 / Step 10일 → **3 folds**
+- 각 fold마다:
+  1. Train 윈도우 거래만으로 best 파라미터 선택
+  2. 그 파라미터로 Test 윈도우 성과만 평가
+- 모든 test 거래 합산 = 진정한 out-of-sample 성과
+
+### 9.2 마하세븐 돌파 — Walk-forward ✅ **통과**
+
+| Fold | Train n / expect / PF | Test n / expect / PF | Best params |
+|------|--------------------|---------------------|------------|
+| F1 | 131 / +2.97% / **2.75** | 64 / **+4.62%** / **7.26** | surge=1.5, ts=0.02, hold=3 |
+| F2 | 143 / +3.32% / **3.45** | 60 / **+2.40%** / **2.21** | (동일) |
+| F3 | 132 / +2.99% / **3.17** | 33 / **+3.14%** / **2.44** | (동일) |
+
+**통합 test (157 거래)**: **승률 63.7%, 거래당 +3.46%, PF 3.28, Sharpe 0.40**
+
+핵심 관찰:
+- **3개 fold 모두 같은 파라미터 선택** → 시장 상황에 둔감, 매우 견고
+- **3개 fold 모두 test에서 양의 엣지** → 진짜 엣지 존재
+- Train PF 2.75~3.45 vs Test PF 2.21~7.26 → 과적합 없음 (오히려 test가 좋은 경우도)
+
+### 9.3 장영한 — Walk-forward ❌ **불합격**
+
+| Fold | Train n / expect / PF | Test n / expect / PF | Best params |
+|------|--------------------|---------------------|------------|
+| F1 | 73 / +8.04% / **13.83** | 14 / +2.38% / 1.91 | fast=3, slow=15, stop=2.5, target=3.0, hold=10 |
+| F2 | 49 / +6.91% / 4.96 | 19 / **-4.79%** / **0.35** | fast=8, slow=20, stop=1.5, target=5.0, hold=10 |
+| F3 | 54 / +1.52% / 1.44 | 62 / +2.50% / 1.83 | fast=3, slow=15, stop=1.5, target=5.0, hold=5 |
+
+**통합 test (95 거래)**: 승률 44.2%, 거래당 +1.02%, PF 1.27
+
+핵심 관찰:
+- **Fold마다 best 파라미터가 달라짐** → 시장 상황에 강하게 의존
+- **F2 test에서 -4.79%** → 실전 운용 시 큰 손실 가능
+- Train PF 14 → Test PF 0.35 같은 강한 폭락 (F2) — 명백한 과적합 신호
+- 통합 test 엣지 +1.02%는 마하세븐(+3.46%)의 1/3 수준
+
+### 9.4 결론
+
+| 전략 | Walk-forward 결과 | 실전 채택 |
+|------|-----------------|-----------|
+| **마하세븐 돌파** | 3 fold 일관되게 양의 엣지, 같은 파라미터, PF 3.28 | **자동매매 1순위 추천** |
+| **장영한 추세추종** | Fold마다 best 변동, F2에서 -4.79% | 단독 운용 비추천. 보조 신호로만 |
+
+**마하세븐 포식자 시스템(돌파 모드)이 본 백테스트에서 유일하게 walk-forward 검증을 통과한 전략**입니다.
+plan.md 자동매매 시스템에 1순위로 이식해야 할 룰:
+
+```
+진입 조건:
+  · 당일 거래대금 상위 50 (cross-sectional)
+  · 당일 거래대금 ≥ 20일 평균 × 1.5
+  · 5MA > 20MA (정배열)
+  · 20일 신고가 돌파
+
+청산 조건:
+  · Hard stop: 5MA 하향 돌파 시 즉시 5MA 가격으로 청산
+  · Trailing stop: 고점 대비 -2% 이탈 시 청산
+  · Time cut: 매수 후 3거래일 경과 시 종가 청산
+
+자금관리:
+  · 일일 누적 P&L -5% 도달 시 당일 신규 진입 차단
+  · (추가 권장) 진입당 자본의 10% 이내, 동시 보유 5종목 이내
+```
+
+### 9.5 한계 — 데이터·분봉
+
+- **60거래일은 walk-forward에 여전히 짧음**. 1년+ 데이터로 5~10 fold가 이상적
+- **분봉 데이터 부재**: 현 sandbox는 `raw.githubusercontent.com`만 접근 가능, KRX/네이버 분봉 봉쇄
+  - 마하세븐 본인의 매매(분·초 단위 호가창)는 일봉 walk-forward로도 일부만 검증됨
+  - 진짜 분봉 검증은 키움 OpenAPI+ 로컬 환경 필요 (Windows + 키움 계좌)
+- 3 fold는 통계적으로 충분하지 않음 — 실전 투입 전 6개월+ 분봉 데이터로 재검증 권장
+
+### 9.6 실행
+
+```bash
+python3 walk_forward.py
+# Outputs:
+#   results/walkforward_summary.md
+#   results/10_wf_machaseven.png
+#   results/11_wf_jyh.png
+#   results/wf_machaseven_breakout.csv
+#   results/wf_jyh.csv
+```
