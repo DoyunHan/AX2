@@ -502,3 +502,73 @@ bot.run_one_day(date.today())
 ```
 
 `KiwoomAdapter`의 NotImplementedError 메서드들(`get_universe_amount_top`, `get_daily_chart`, `get_minute_chart`, `get_orderbook`, `get_account_balance`)은 plan.md Phase 1 에서 키움 TR 명세대로 채우면 됩니다.
+
+---
+
+## 12. 진입 시점 최적화 (`run_entry_timing.py` + `run_minute_synthetic.py`)
+
+마하세븐 돌파의 다음 개선 축은 진입 가격. 분봉 데이터가 부재한 sandbox에서
+가능한 두 트랙으로 진행:
+
+- (A) **일봉 OHLC 기반 sensitivity 분석** — 진입가만 바꾸고 exit는 고정
+- (B) **합성 분봉(Brownian bridge) 기반 정밀 진입 룰** — 분봉 데이터 도착 시 그대로 재실행
+
+### 12.1 (A) 일봉 sensitivity 결과
+
+| 시나리오 | trades | fill | win% | expect | PF |
+|----------|------:|----:|-----:|-------:|---:|
+| open (baseline) | 261 | 100% | 62.1% | **+2.93%** | **2.79** |
+| midday (~12:30) | 261 | 100% | 49.0% | +1.24% | 1.52 |
+| close (지연) | 261 | 100% | 51.0% | **-0.05%** | 0.99 |
+| limit -0.5% / skip | 224 | 85.8% | 61.6% | +3.02% | 2.77 |
+| limit -1.0% / skip | 204 | 78.2% | 60.3% | +3.12% | 2.85 |
+| limit -2.0% / skip | 165 | 63.2% | 61.8% | +3.12% | 2.93 |
+| **low (theoretical ceiling)** | 261 | 100% | **91.2%** | **+7.53%** | 37.21 |
+
+**해석**:
+- **베이스라인(시초가 시장가)이 이미 거의 최적**. midday/close 지연은 모멘텀을 놓침
+- Limit -0.5~-2% 는 미세 개선(+0.1~0.2%p)이지만 체결률 86~63% 으로 trade-off
+- **이론 ceiling +7.53%p** 가 진입 시점 최적화의 잠재 상한 → 분봉 정밀 매매로 1/3 정도 따라잡는 게 현실적 목표
+
+### 12.2 (B) 합성 분봉 + 정밀 룰 결과
+
+⚠️ Brownian-bridge 합성 데이터 사용. 절대 수치 X, **상대 비교만 신뢰**.
+
+| 정밀 진입 룰 | trades | fill | expect | PF |
+|------------|------:|----:|-------:|---:|
+| market_open (baseline) | 261 | 100% | +2.93% | 2.79 |
+| wait 15min | 261 | 100% | +2.54% | 2.45 |
+| wait 30min | 261 | 100% | +2.10% | 2.04 |
+| limit -0.5% / skip | 224 | 86% | +3.02% | 2.77 |
+| limit -1.0% / market fallback | 261 | 100% | +1.52% | 1.57 |
+| **first pullback -0.5%** | 222 | **85%** | **+4.00%** | **3.94** |
+| **first pullback -1.0%** | 202 | 77% | +3.86% | 3.86 |
+| volume confirm x2 @ 15min | 0 | 0% | — | — |
+
+**핵심 발견**:
+- **first pullback (Open-X% 도달 후 첫 회복봉 진입) 룰이 PF 3.94 — 베이스라인 대비 41% 개선**
+- 이것이 정확히 마하세븐 명세의 "5MA 눌림목 + 음봉 후 회복" 철학과 일치
+- wait/limit/fallback 룰은 모두 모멘텀 잠식 (지연 = 손해)
+- volume confirm threshold 는 합성 데이터 분포가 비현실적이라 0 fill — 실데이터로 재조정 필요
+
+### 12.3 실데이터 도착 시 검증 우선순위 (분봉 OPT10080)
+
+1. **first pullback -0.5%** : 가장 유망 (PF 3.94 합성 → 실데이터 검증)
+2. **limit -0.5% / skip** : fail-safe baseline+
+3. **volume confirm @ 15min** : threshold 1.2x/1.5x/2x 스윕
+
+### 12.4 분봉 데이터 도착 시 사용할 코드 (`kiwoom/data/minute_loader.py`)
+
+- **`KiwoomMinuteSource`** : 키움 OPT10080 어댑터 (현재는 NotImplementedError, plan.md Phase 1에서 구현)
+- **`SyntheticMinuteGenerator`** : Brownian-bridge 합성 분봉 (테스트용)
+- **`EntryRule` + `simulate_entry`** : 진입 룰 정의 및 시뮬레이션 함수
+  - market_open / wait_n_minutes / limit_below_open / first_pullback / volume_confirm
+
+실데이터 도착 시 `run_minute_synthetic.py` 의 `SyntheticMinuteGenerator` 를
+`KiwoomMinuteSource` 로 교체만 하면 동일 룰 그대로 검증 가능.
+
+### 12.5 정직 코너
+
+- 합성 분봉은 일봉 OHLC + Brownian bridge → **실 시장의 시초 변동성·후반 매도 압박·체결 강도** 미반영
+- first pullback 의 +1.07%p 개선은 **상대적 우선순위 신호**, 실 도달 가능성은 절반 수준일 가능성
+- 호가창 의존 룰(매수강도, tick imbalance)은 합성으로 검증 자체 불가
