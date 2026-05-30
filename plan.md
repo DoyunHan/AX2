@@ -264,11 +264,15 @@ project/
 ## 6. 개발 로드맵
 
 ### Phase 1: 기반 구축 (1~2주)
-- [ ] 키움증권 계좌 개설 및 OpenAPI+ 신청
-- [ ] 개발 환경 설정 (Python 32비트, PyQt5, pykiwoom)
-- [ ] KOA Studio 설치 및 TR 함수 테스트
-- [ ] 로그인/접속 모듈 개발
-- [ ] 기본 시세 조회 기능 구현
+
+**상세 셋업 가이드: [`kiwoom/SETUP.md`](kiwoom/SETUP.md)**
+**최소 연결 테스트 스크립트: [`kiwoom/scripts/test_connection.py`](kiwoom/scripts/test_connection.py)**
+
+- [ ] 키움증권 계좌 개설 및 OpenAPI+ 신청 ← SETUP.md §2~§3
+- [ ] 개발 환경 설정 (Python 32비트, PyQt5, pykiwoom) ← SETUP.md §4
+- [ ] KOA Studio 설치 및 TR 함수 테스트 ← SETUP.md §5
+- [ ] 로그인/접속 모듈 개발 ← SETUP.md §6 + test_connection.py
+- [ ] 기본 시세 조회 기능 구현 ← SETUP.md §7
 
 ### Phase 2: 데이터 수집 (1~2주)
 - [ ] 실시간 시세 수신 모듈
