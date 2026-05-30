@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>카탈리스트 캘린더 — Catalyst Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --bg:#0a0e14; --surface:#131820; --surface2:#1a2030; --border:#1e2a3a;
+    --text:#c5d0dc; --dim:#5c6a7a; --accent:#6c63ff; --accent-glow:rgba(108,99,255,.3);
+    --green:#3ddc84; --yellow:#ffc107; --red:#ff5252; --blue:#40c4ff; --orange:#ff9100; --violet:#b388ff;
+  }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter','JetBrains Mono',sans-serif; font-size:14px; line-height:1.6; min-height:100vh;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .scanline{position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px); pointer-events:none; z-index:9999;}
+
+  header{ background:linear-gradient(180deg,var(--surface),var(--bg)); border-bottom:1px solid var(--border); padding:36px 24px 28px; position:relative; overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 30% 0%,var(--accent-glow),transparent 70%);opacity:.5;}
+  .wrap{max-width:1000px; margin:0 auto; padding:0 24px;}
+  .tag{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); border:1px solid var(--border); border-radius:999px; padding:5px 14px; margin-bottom:14px; position:relative;}
+  header h1{font-size:1.9rem; font-weight:700; letter-spacing:-.02em; position:relative;}
+  header p{color:var(--dim); margin-top:8px; position:relative; max-width:640px;}
+
+  main{max-width:1000px; margin:0 auto; padding:28px 24px 80px;}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;}
+  .filterbtn{ font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--surface); color:var(--dim); border:1px solid var(--border); border-radius:6px; padding:7px 12px; cursor:pointer; transition:.15s; display:flex; align-items:center; gap:7px;}
+  .filterbtn:hover{ color:var(--text); border-color:var(--accent);}
+  .filterbtn.active{ color:#fff; border-color:var(--accent); background:var(--surface2);}
+  .dot{width:9px; height:9px; border-radius:50%;}
+  .search{ margin-left:auto; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:8px 12px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px; min-width:160px;}
+  .search:focus{outline:none; border-color:var(--accent);}
+
+  .countbar{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); margin:14px 0 18px; letter-spacing:.04em;}
+
+  .daygroup{margin-bottom:26px;}
+  .dayhdr{ display:flex; align-items:baseline; gap:12px; padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:12px;}
+  .dayhdr .date{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; color:#e7eef6;}
+  .dayhdr .dow{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dim);}
+  .dayhdr .until{margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent);}
+
+  .evt{ display:grid; grid-template-columns:78px 1fr auto; gap:14px; align-items:center; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:13px 16px; margin-bottom:9px;}
+  .evt .sym{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; color:#e7eef6;}
+  .evt .meta .type{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:2px 8px; border-radius:4px; background:var(--surface2);}
+  .evt .meta .note{display:block; margin-top:4px; color:var(--text); font-size:13px;}
+  .evt .meta .name{color:var(--dim); font-size:12px;}
+  .evt .risk{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em; padding:4px 9px; border-radius:5px; white-space:nowrap;}
+  .risk.binary{background:rgba(255,82,82,.14); color:var(--red);}
+  .risk.high{background:rgba(255,145,0,.14); color:var(--orange);}
+  .risk.med{background:rgba(255,193,7,.14); color:var(--yellow);}
+
+  .legend-note{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-top:28px; color:var(--dim); font-size:12.5px; line-height:1.7;}
+  .legend-note strong{color:#e7eef6;}
+  .legend-note code{font-family:'JetBrains Mono',monospace; background:var(--surface2); padding:1px 6px; border-radius:4px; color:var(--blue);}
+  .disclaimer{ border-left:3px solid var(--red); background:rgba(255,82,82,.1); border-radius:0 8px 8px 0; padding:14px 18px; margin-top:20px; font-size:12.5px; color:var(--text);}
+  .disclaimer .lbl{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; opacity:.85;}
+  footer{text-align:center; padding:36px 24px; color:var(--dim); font-size:.78rem; font-family:'JetBrains Mono',monospace;}
+  @media(max-width:600px){ .evt{grid-template-columns:1fr; gap:8px;} .evt .risk{justify-self:start;} }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<header>
+  <div class="wrap">
+    <span class="tag">Catalyst Calendar · 날짜가 정해진 급등 후보</span>
+    <h1>예정된 카탈리스트 추적</h1>
+    <p>"하룻밤 급등"의 일부는 <strong>날짜가 미리 정해져 있다</strong> — FDA 승인일(PDUFA), 임상 결과, 실적, 락업 해제 같은 이벤트. 결과가 갈리는 날을 미리 알면 후보를 좁힐 수 있다(단, 결과 방향은 모른다).</p>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar" id="filters"></div>
+  <input id="search" class="search" placeholder="티커/메모 검색…" oninput="render()">
+  <div class="countbar" id="count"></div>
+  <div id="cal"></div>
+
+  <div class="legend-note">
+    <strong>이 캘린더 채우는 법.</strong> 아래 <code>EVENTS</code> 배열은 <em>예시 데이터</em>입니다(실제 일정 아님).
+    실제 일정으로 채우려면 무료/유료 소스에서 가져오세요 —
+    <strong>FDA PDUFA·임상</strong>: BioPharmaCatalyst, RTTNews, ClinicalTrials.gov ·
+    <strong>실적</strong>: Yahoo/Nasdaq earnings calendar ·
+    <strong>락업 해제</strong>: MarketBeat IPO lockup ·
+    <strong>지수 리밸런싱</strong>: FTSE/Russell·S&amp;P 공지.
+    각 항목은 <code>{date, sym, name, type, note, risk}</code> 형식으로 추가하면 자동 정렬·표시됩니다.
+  </div>
+
+  <div class="disclaimer">
+    <span class="lbl">Disclaimer</span>
+    교육·정보 목적의 예시이며 투자 권유가 아닙니다. 카탈리스트 이벤트(특히 <strong>바이너리 이벤트</strong>)는 결과가 나쁘면 같은 폭으로 <strong>폭락</strong>합니다. 날짜를 안다고 방향을 아는 게 아닙니다.
+  </div>
+</main>
+
+<footer>AX2 · Catalyst Calendar · 예시 데이터 · Not financial advice</footer>
+
+<script>
+// ── 카탈리스트 타입 정의 (색/라벨) ──────────────────────────────
+const TYPES = {
+  pdufa:   {label:"FDA PDUFA",  color:"#ff5252"},
+  trial:   {label:"임상 결과",   color:"#3ddc84"},
+  earnings:{label:"실적발표",    color:"#40c4ff"},
+  lockup:  {label:"락업 해제",   color:"#ff9100"},
+  index:   {label:"지수 리밸런싱",color:"#b388ff"},
+  meeting: {label:"주총/이벤트",  color:"#ffc107"},
+};
+
+// ── 이벤트 데이터 (예시) — 실제 일정으로 교체해서 사용 ──────────
+// risk: "binary"(결과로 ±폭발) | "high" | "med"
+const EVENTS = [
+  {date:"2026-06-02", sym:"SQZX", name:"Squeezeco Bio",  type:"pdufa",    note:"희귀질환 신약 PDUFA 결정일", risk:"binary"},
+  {date:"2026-06-03", sym:"MEME", name:"MemeStonk Inc",  type:"earnings", note:"1분기 실적 + 가이던스",      risk:"high"},
+  {date:"2026-06-05", sym:"BIOX", name:"BioCat Therap",  type:"trial",    note:"3상 톱라인 데이터 공개",     risk:"binary"},
+  {date:"2026-06-09", sym:"NEWI", name:"NewIPO Tech",    type:"lockup",   note:"IPO 락업 해제(내부자 매도 가능)", risk:"high"},
+  {date:"2026-06-12", sym:"SMLL", name:"SmallCap Co",    type:"index",    note:"Russell 2000 재구성 발효",   risk:"med"},
+  {date:"2026-06-15", sym:"REVS", name:"RevSplit Corp",  type:"meeting",  note:"주주총회·리버스 스플릿 표결", risk:"high"},
+  {date:"2026-06-18", sym:"PHRM", name:"PharmaX",        type:"pdufa",    note:"항암제 보충신청(sNDA) 결정", risk:"binary"},
+  {date:"2026-06-24", sym:"LOWF", name:"LowFloat Mining",type:"earnings", note:"분기 실적(저플로팅 주의)",    risk:"high"},
+];
+
+let active = new Set(Object.keys(TYPES)); // 모든 타입 on
+
+function buildFilters(){
+  const box = document.getElementById("filters");
+  const all = document.createElement("button");
+  all.className = "filterbtn active"; all.textContent = "ALL";
+  all.onclick = ()=>{ active = new Set(Object.keys(TYPES)); syncBtns(); render(); };
+  box.appendChild(all);
+  for(const [k,v] of Object.entries(TYPES)){
+    const b = document.createElement("button");
+    b.className = "filterbtn active"; b.dataset.type = k;
+    b.innerHTML = `<span class="dot" style="background:${v.color}"></span>${v.label}`;
+    b.onclick = ()=>{
+      if(active.has(k)) active.delete(k); else active.add(k);
+      if(active.size===0) active = new Set(Object.keys(TYPES));
+      syncBtns(); render();
+    };
+    box.appendChild(b);
+  }
+}
+function syncBtns(){
+  document.querySelectorAll(".filterbtn[data-type]").forEach(b=>{
+    b.classList.toggle("active", active.has(b.dataset.type));
+  });
+  const allOn = active.size === Object.keys(TYPES).length;
+  document.querySelector(".filterbtn:not([data-type])").classList.toggle("active", allOn);
+}
+
+const DOW = ["일","월","화","수","목","금","토"];
+function daysUntil(iso){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(iso+"T00:00:00");
+  return Math.round((d - today)/86400000);
+}
+
+function render(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const items = EVENTS
+    .filter(e => active.has(e.type))
+    .filter(e => !q || (e.sym+" "+e.name+" "+e.note).toLowerCase().includes(q))
+    .sort((a,b)=> a.date.localeCompare(b.date));
+
+  document.getElementById("count").textContent =
+    `${items.length} events · ${active.size}/${Object.keys(TYPES).length} types`;
+
+  const byDate = {};
+  for(const e of items){ (byDate[e.date] ||= []).push(e); }
+
+  const cal = document.getElementById("cal");
+  cal.innerHTML = "";
+  if(items.length===0){ cal.innerHTML = `<p class="mono" style="color:var(--dim)">조건에 맞는 이벤트 없음.</p>`; return; }
+
+  for(const date of Object.keys(byDate).sort()){
+    const d = new Date(date+"T00:00:00");
+    const du = daysUntil(date);
+    const untilTxt = du<0 ? `${-du}일 전` : du===0 ? "오늘" : `D-${du}`;
+    const g = document.createElement("div"); g.className="daygroup";
+    g.innerHTML = `<div class="dayhdr">
+        <span class="date">${date}</span>
+        <span class="dow">(${DOW[d.getDay()]})</span>
+        <span class="until">${untilTxt}</span>
+      </div>`;
+    for(const e of byDate[date]){
+      const t = TYPES[e.type];
+      const riskTxt = {binary:"BINARY ±폭발", high:"HIGH RISK", med:"MEDIUM"}[e.risk] || e.risk;
+      const ev = document.createElement("div");
+      ev.className="evt"; ev.style.borderLeftColor = t.color;
+      ev.innerHTML = `
+        <div class="sym">${e.sym}</div>
+        <div class="meta">
+          <span class="type" style="color:${t.color}">${t.label}</span>
+          <span class="name"> · ${e.name}</span>
+          <span class="note">${e.note}</span>
+        </div>
+        <div class="risk ${e.risk}">${riskTxt}</div>`;
+      g.appendChild(ev);
+    }
+    cal.appendChild(g);
+  }
+}
+
+buildFilters();
+render();
+</script>
+</body>
+</html>

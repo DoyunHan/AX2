@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하룻밤 급등주 해부 — Overnight Gainers Field Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e14;
+    --surface: #131820;
+    --surface2: #1a2030;
+    --border: #1e2a3a;
+    --text: #c5d0dc;
+    --text-dim: #5c6a7a;
+    --accent: #6c63ff;
+    --accent-glow: rgba(108, 99, 255, 0.3);
+    --green: #3ddc84;
+    --green-dim: rgba(61, 220, 132, 0.12);
+    --yellow: #ffc107;
+    --yellow-dim: rgba(255, 193, 7, 0.12);
+    --red: #ff5252;
+    --red-dim: rgba(255, 82, 82, 0.12);
+    --blue: #40c4ff;
+    --blue-dim: rgba(64, 196, 255, 0.12);
+    --orange: #ff9100;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'JetBrains Mono', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .scanline {
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  header {
+    background: linear-gradient(180deg, var(--surface), var(--bg));
+    border-bottom: 1px solid var(--border);
+    padding: 64px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 50% 0%, var(--accent-glow), transparent 70%);
+    opacity: 0.5;
+  }
+  .tag {
+    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; margin-bottom: 20px;
+    position: relative;
+  }
+  header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; position: relative; }
+  header h1 .em { color: var(--red); }
+  header p.sub { color: var(--text-dim); margin-top: 14px; font-size: 1rem; position: relative; max-width: 620px; margin-left:auto; margin-right:auto;}
+
+  main { max-width: 880px; margin: 0 auto; padding: 0 24px 80px; }
+
+  section { padding: 52px 0; border-bottom: 1px solid var(--border); }
+  .secnum { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 13px; letter-spacing: 0.15em; }
+  h2 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; margin: 6px 0 18px; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 26px 0 10px; }
+  p { margin: 12px 0; }
+  strong { color: #e7eef6; font-weight: 600; }
+  a { color: var(--blue); text-decoration: none; border-bottom: 1px dotted var(--blue); }
+
+  .callout {
+    border-left: 3px solid var(--red); background: var(--red-dim);
+    padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 22px 0;
+  }
+  .callout.warn { border-color: var(--yellow); background: var(--yellow-dim); }
+  .callout.info { border-color: var(--blue); background: var(--blue-dim); }
+  .callout .lbl { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; display:block; margin-bottom: 4px;}
+
+  .cards { display: grid; gap: 14px; margin: 22px 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; position: relative; overflow: hidden;
+  }
+  .card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--accent); }
+  .card.t-squeeze::before { background: var(--red); }
+  .card.t-bio::before { background: var(--green); }
+  .card.t-pump::before { background: var(--orange); }
+  .card.t-rev::before { background: var(--yellow); }
+  .card.t-meme::before { background: var(--blue); }
+  .card h3 { margin: 0 0 6px; display:flex; align-items:center; gap:10px;}
+  .card .badge { font-family:'JetBrains Mono', monospace; font-size:10px; padding:2px 8px; border-radius:4px; background: var(--surface2); color: var(--text-dim); letter-spacing:0.08em;}
+  .card p { margin: 6px 0 0; font-size: 0.92rem; color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); background: var(--surface); }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+  td.mono { font-family:'JetBrains Mono', monospace; color: var(--blue); }
+
+  .checklist { list-style: none; margin: 18px 0; }
+  .checklist li { padding: 9px 0 9px 32px; position: relative; border-bottom: 1px dashed var(--border); }
+  .checklist li::before { content: '▢'; position: absolute; left: 4px; color: var(--accent); font-family:'JetBrains Mono', monospace;}
+  .checklist li strong { color: #e7eef6; }
+
+  .flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin: 20px 0; font-family:'JetBrains Mono', monospace; font-size: 0.82rem;}
+  .flow .step { background: var(--surface); border:1px solid var(--border); border-radius:6px; padding:8px 12px;}
+  .flow .arrow { color: var(--accent); }
+  .flow .danger { border-color: var(--red); color: var(--red); }
+
+  .disc { color: var(--text-dim); font-size: 0.82rem; line-height: 1.7; }
+  footer { text-align:center; padding: 40px 24px; color: var(--text-dim); font-size: 0.8rem; font-family:'JetBrains Mono', monospace;}
+
+  @media (max-width: 640px) {
+    header h1 { font-size: 1.7rem; }
+    section { padding: 40px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<header>
+  <span class="tag">Field Guide · 미국 소형주 급등 현상</span>
+  <h1>하룻밤에 <span class="em">+700%</span> 나는 종목,<br>어떻게 미리 잡나?</h1>
+  <p class="sub">먼저 알아야 할 건 "비법"이 아니라 <strong>왜 대부분은 여기서 돈을 잃는가</strong>입니다. 구조를 알면 후보는 좁힐 수 있지만, 예측은 환상에 가깝습니다.</p>
+</header>
+
+<main>
+
+  <section>
+    <span class="secnum">00 / 핵심 요약</span>
+    <h2>TL;DR — 3줄 요약</h2>
+    <ul class="checklist">
+      <li><strong>예측이 아니라 구조다.</strong> 하룻밤 폭등은 유통주식(float)이 극도로 적은 소형주에서 숏스퀴즈·카탈리스트·작전이 겹칠 때 나온다.</li>
+      <li><strong>후보는 좁힐 수 있다.</strong> 저플로팅 + 높은 공매도 + 프리마켓 갭 + 명확한 카탈리스트, 이 4개 필터로 풀을 관리한다.</li>
+      <li><strong>그래도 대부분 잃는다.</strong> 거래정지(halt)·체결취소(rollback)·증자(dilution)·생존자 편향. "잡는" 게 아니라 "확률 게임 + 손절 + 작은 포지션"이다.</li>
+    </ul>
+    <div class="callout">
+      <span class="lbl">Disclaimer</span>
+      이 문서는 <strong>교육·정보 목적</strong>이며 투자 권유가 아닙니다. 여기 설명된 종목들은 변동성이 극단적이고 손실 위험이 매우 큽니다.
+    </div>
+  </section>
+
+  <section>
+    <span class="secnum">01 / 현실</span>
+    <h2>당신이 보는 건 "이긴 1종목"뿐이다</h2>
+    <p>SNS·유튜브·단톡방에서 "이 종목으로 700% 먹었다"는 자랑은 넘쳐납니다. 하지만 거기엔 두 가지 함정이 있어요.</p>
+    <h3>생존자 편향 (Survivorship Bias)</h3>
+    <p>700% 난 1종목 뒤에는 <strong>똑같은 조건이었는데 안 움직이거나 -80% 난 수백 종목</strong>이 있습니다. 후보 풀에서 실제로 터지는 건 극소수고, 자랑하는 사람은 터진 것만 보여줍니다. 손실은 조용히 묻힙니다.</p>
+    <h3>"미리 안" 사람의 정체</h3>
+    <p>정말로 폭등 직전에 매집한 사람들의 상당수는 예측을 잘한 게 아니라 — (a) <strong>작전(펌프)의 일부</strong>였거나, (b) <strong>운</strong>이었거나, (c) 내부정보에 가까운 위치였습니다. 평범한 개미가 "차트만 보고" 사전에 잡는 건 드뭅니다.</p>
+    <div class="callout warn">
+      <span class="lbl">기억할 것</span>
+      한국의 SG증권발 하한가 사태나 "8개 종목 하한가 폭탄으로 7,300억 챙긴 작전" 사건처럼 — <strong>누군가 미리 매집해두고 끌어올린 뒤 개미에게 떠넘기는 구조</strong>가 이 시장의 본질에 가깝습니다.
+    </div>
+  </section>
+
+  <section>
+    <span class="secnum">02 / 해부</span>
+    <h2>폭등은 5가지 유형으로 나뉜다</h2>
+    <p>이유 없는 급등은 없습니다. 하룻밤 급등은 거의 다 아래 중 하나(또는 조합)입니다.</p>
+    <div class="cards">
+      <div class="card t-squeeze">
+        <h3>① 숏스퀴즈 <span class="badge">SHORT SQUEEZE</span></h3>
+        <p>유통주식이 적은데 공매도가 잔뜩 쌓인 종목. 작은 호재에 공매도 청산이 연쇄적으로 터지며 수직 상승. 대차 수수료(borrow fee)가 비쌀수록 압력이 큼. → 가장 폭발력 큰 유형.</p>
+      </div>
+      <div class="card t-bio">
+        <h3>② 바이오 카탈리스트 <span class="badge">BINARY EVENT</span></h3>
+        <p>FDA 승인(PDUFA 날짜), 임상 3상 결과 등 "예/아니오"가 갈리는 이벤트. 결과가 좋으면 하룻밤에 갭. <strong>날짜가 미리 정해져 있다</strong>는 게 특징 — 그래서 캘린더로 추적 가능.</p>
+      </div>
+      <div class="card t-pump">
+        <h3>③ 펌프 앤 덤프 / 작전 <span class="badge">MANIPULATION</span></h3>
+        <p>세력이 미리 매집 → 뉴스·SNS·스팸으로 끌어올림 → 고점에서 개미에게 떠넘김. 이유를 찾아도 빈약하거나, 갑자기 거래량만 폭증. <strong>가장 위험</strong>. 늦게 타면 출구에서 깔림.</p>
+      </div>
+      <div class="card t-rev">
+        <h3>④ 리버스 스플릿 / 상폐 직전 <span class="badge">LOW PRICE</span></h3>
+        <p>상장 유지 못 해 액면병합(reverse split)한 직후 유통주식이 더 줄어들어 변동성 폭발. 또는 상폐·파산 직전 마지막 발악성 급등락. 펀더멘털 없음.</p>
+      </div>
+      <div class="card t-meme">
+        <h3>⑤ 밈 / 소셜 모멘텀 <span class="badge">RETAIL FOMO</span></h3>
+        <p>Reddit·X·StockTwits에서 거론량이 급증하며 개미 자금이 몰림. GME/AMC 계열. 펀더멘털보다 "관심량"이 동력. 소셜 데이터로 사전 포착이 일부 가능.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="secnum">03 / 스크리닝</span>
+    <h2>후보를 좁히는 4대 필터</h2>
+    <p>프로 데이트레이더가 쓰는 건 "예측"이 아니라 <strong>필터링</strong>입니다. 폭등 가능성이 높은 조건의 종목 풀을 매일 좁히고, 실제 움직임이 나오면 빠르게 올라탑니다.</p>
+    <table>
+      <thead><tr><th>필터</th><th>기준 (전형값)</th><th>데이터 출처</th></tr></thead>
+      <tbody>
+        <tr><td><strong>저플로팅 (Low Float)</strong></td><td class="mono">유통주식 &lt; 1천만~5천만 주</td><td>Finviz · Fintel</td></tr>
+        <tr><td><strong>높은 공매도</strong></td><td class="mono">Short% of float ↑, borrow fee ↑</td><td>Ortex · Fintel · ChartMill</td></tr>
+        <tr><td><strong>프리마켓/AH 갭</strong></td><td class="mono">장전 +4% 이상 & 거래량 급증</td><td>TradingView · Trade Ideas</td></tr>
+        <tr><td><strong>카탈리스트</strong></td><td class="mono">실적·FDA·계약·M&amp;A 뉴스</td><td>Benzinga · 캘린더</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info">
+      <span class="lbl">60초 룰</span>
+      갭이 떴는데 <strong>60초 안에 이유(카탈리스트)를 못 찾으면 그게 위험 신호</strong>입니다. 이유 없는 급등은 작전일 확률이 높다는 트레이더들의 경험칙이에요.
+    </div>
+    <h3>왜 저플로팅이 핵심인가</h3>
+    <p>유통주식 1천만 주짜리 종목이 프리마켓에 100만 주 거래됐다면 이미 플로팅의 10%가 돈 겁니다. 장 열리면 하루에 플로팅 전체가 회전할 가능성이 높고 — <strong>공급이 적으니 작은 수요에도 가격이 수직</strong>으로 튑니다.</p>
+  </section>
+
+  <section>
+    <span class="secnum">04 / 도구</span>
+    <h2>실제로 쓰는 도구 스택</h2>
+    <table>
+      <thead><tr><th>용도</th><th>도구</th></tr></thead>
+      <tbody>
+        <tr><td>실시간 스캐너</td><td class="mono">Trade Ideas · Benzinga Pro · DAS</td></tr>
+        <tr><td>플로팅 / 공매도 데이터</td><td class="mono">Fintel · Ortex · Finviz</td></tr>
+        <tr><td>프리마켓 갭 랭킹</td><td class="mono">TradingView · Yahoo Screener</td></tr>
+        <tr><td>소셜 거론량 모니터링</td><td class="mono">StockTwits · Reddit · X</td></tr>
+        <tr><td>카탈리스트 캘린더</td><td class="mono">FDA PDUFA · 실적 캘린더</td></tr>
+      </tbody>
+    </table>
+    <p class="disc">※ 이 저장소에 포함된 <span class="mono">screener.py</span>(스크리너)와 <span class="mono">catalyst-calendar.html</span>(캘린더)이 위 ③·⑤ 기능의 미니 버전입니다.</p>
+  </section>
+
+  <section>
+    <span class="secnum">05 / 위험</span>
+    <h2>"롤백 사태"가 보여주는 게임의 본질</h2>
+    <p>종목이 비정상적으로 폭등하면 시장은 가만있지 않습니다. 이게 "미리 잡아도 못 먹는" 이유예요.</p>
+    <div class="flow">
+      <span class="step">갭 +200%</span>
+      <span class="arrow">→</span>
+      <span class="step danger">거래정지 HALT</span>
+      <span class="arrow">→</span>
+      <span class="step">재개 후 급변동</span>
+      <span class="arrow">→</span>
+      <span class="step danger">체결취소 ROLLBACK</span>
+      <span class="arrow">→</span>
+      <span class="step danger">증자/희석 DILUTION</span>
+    </div>
+    <ul class="checklist">
+      <li><strong>거래정지(Halt):</strong> 변동성이 크면 거래소가 5분씩 정지. 사고 싶어도 못 사고, 팔고 싶어도 못 판다.</li>
+      <li><strong>체결취소(Rollback):</strong> 결제 오류·시스템 사고로 이미 체결된 거래가 취소되는 사상초유급 사태. 수익이 증발한다.</li>
+      <li><strong>증거금/신용 차단:</strong> 증권사가 갑자기 신용한도를 막아 매수가 막히는 일도 있다.</li>
+      <li><strong>증자/희석(Dilution):</strong> 회사가 고점에서 신주를 대량 발행 → 주가는 추락. 작전주의 단골 엔딩.</li>
+    </ul>
+    <div class="callout">
+      <span class="lbl">현실</span>
+      작전주는 <strong>올라간 속도보다 빠르게 무너집니다.</strong> 늦게 탄 개미가 출구에서 깔립니다. 그래서 프로도 이걸 "투자"가 아니라 작은 포지션의 확률 게임으로 다룹니다.
+    </div>
+  </section>
+
+  <section>
+    <span class="secnum">06 / 체크리스트</span>
+    <h2>"미리 알고 잡자"의 현실적 버전</h2>
+    <p>마법의 예측기는 없습니다. 대신 규율 있는 프로세스는 있습니다.</p>
+    <ul class="checklist">
+      <li>매일 <strong>후보 풀</strong>을 갱신한다 (저플로팅 + 공매도 + 갭 + 카탈리스트 필터 통과 종목).</li>
+      <li>갭이 뜨면 <strong>60초 안에 카탈리스트</strong>를 확인한다. 이유 없으면 패스.</li>
+      <li><strong>자기 자본의 아주 일부</strong>만 (한 종목 1~2% 룰 등). 전 재산 베팅 금지.</li>
+      <li>진입 전에 <strong>손절선</strong>을 먼저 정한다. 거래정지로 손절 못 할 수 있음을 가정한다.</li>
+      <li>이미 +수백% 간 종목을 <strong>추격하지 않는다.</strong> 늦은 진입이 가장 위험하다.</li>
+      <li>증자·리버스 스플릿·상폐 위험 공시를 <strong>먼저</strong> 확인한다.</li>
+      <li>잃어도 되는 돈으로만. <strong>이건 투자가 아니라 변동성 베팅</strong>임을 인정한다.</li>
+    </ul>
+  </section>
+
+  <section style="border-bottom:none;">
+    <span class="secnum">07 / 참고</span>
+    <h2>출처 &amp; 더 읽을거리</h2>
+    <ul class="checklist" style="font-size:0.9rem;">
+      <li><a href="https://centerpointsecurities.com/pre-market-gappers/">CenterPoint — Pre-Market Gappers</a> · 갭 스캐닝과 60초 카탈리스트 룰</li>
+      <li><a href="https://www.warriortrading.com/gap-go/">Warrior Trading — Gap and Go</a> · 저플로팅 모멘텀 전략</li>
+      <li><a href="https://fintel.io/shortSqueeze">Fintel — Short Squeeze Leaderboard</a> · 공매도/스퀴즈 데이터</li>
+      <li><a href="https://www.tradingview.com/markets/stocks-usa/market-movers-pre-market-gappers/">TradingView — Pre-Market Gappers</a> · 실시간 갭 랭킹</li>
+      <li><a href="https://www.mt.co.kr/society/2026/05/09/2026050810363097542">머니투데이</a> · 작전 세력 사건 사례</li>
+    </ul>
+    <div class="callout" style="margin-top:30px;">
+      <span class="lbl">최종 경고</span>
+      <p class="disc" style="margin:0;">본 자료는 교육 목적의 일반 정보이며 특정 종목의 매매 권유나 투자 자문이 아닙니다. 여기 다룬 저플로팅 소형주는 변동성과 손실 위험이 극단적이며, 거래정지·체결취소·증자로 인해 원금을 빠르게 잃을 수 있습니다. 모든 투자 결정과 그 결과는 본인 책임입니다.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  AX2 · Overnight Gainers Field Guide · 교육용 자료 · Not financial advice
+</footer>
+</body>
+</html>
