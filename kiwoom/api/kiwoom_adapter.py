@@ -1,10 +1,9 @@
 """
 키움 OpenAPI+ 어댑터 — 전략 코드를 키움 TR/실시간 데이터에 연결.
 
-이 모듈은 실제 KiwoomOCX 인스턴스에 의존한다. plan.md Phase 1 (키움 계정/
-OpenAPI+ 설치) 후 Windows 환경에서만 동작.
-
-테스트 환경에서는 MockKiwoomAdapter 를 대신 사용.
+본 모듈은 인터페이스(Protocol) 와 테스트용 MockKiwoomAdapter 를 제공한다.
+실제 키움 OCX 어댑터는 별도 모듈 (kiwoom.api.kiwoom_real.KiwoomAdapter) 에
+구현되어 있으며 Windows 32-bit Python + 키움 OpenAPI+ 환경에서만 동작.
 """
 
 from __future__ import annotations
@@ -29,10 +28,11 @@ class KiwoomAdapterProto(Protocol):
         ...
 
     def get_daily_chart(self, code: str, days: int = 60) -> pd.DataFrame:
-        """OPT10081 일봉 차트. 컬럼: Date/Open/High/Low/Close/Volume/Amount."""
+        """OPT10081 일봉 차트. 컬럼: Open/High/Low/Close/Volume/Amount."""
         ...
 
-    def get_minute_chart(self, code: str, interval: int = 1, count: int = 240) -> pd.DataFrame:
+    def get_minute_chart(self, code: str, interval: int = 1,
+                         count: int = 240) -> pd.DataFrame:
         """OPT10080 분봉 차트. interval=1/3/5/10/15/30."""
         ...
 
@@ -41,7 +41,7 @@ class KiwoomAdapterProto(Protocol):
         ...
 
     def send_buy_market(self, code: str, qty: int) -> str:
-        """시장가 매수 (시장가 = 호가구분 03). 반환: 주문번호."""
+        """시장가 매수 (호가구분 03). 반환: 주문번호 또는 ERROR_x."""
         ...
 
     def send_sell_market(self, code: str, qty: int) -> str:
@@ -49,82 +49,31 @@ class KiwoomAdapterProto(Protocol):
 
 
 # ============================================================================
-# 실제 키움 어댑터 (PyQt5 OCX 의존) — production
+# 실 키움 어댑터는 kiwoom_real 모듈에서 import — Windows 외 환경에서는
+# import 시도 자체가 실패할 수 있으므로 lazy import 권장.
 # ============================================================================
 
-class KiwoomAdapter:
+def get_real_adapter(ocx, **kwargs):
     """
-    실제 KiwoomOCX 인스턴스를 감싸는 어댑터.
-
-    pip install pyqt5
-    + OpenAPI+ 설치 (Windows 전용, 키움증권 계좌 필수)
-    + KOA Studio 로 TR 코드 학습 권장.
-
-    스레딩 주의: PyQt5 이벤트 루프가 메인 스레드여야 한다.
-    초당 5회 TR 제한, 시간당 1,000회 제한 준수 필요.
+    Production 어댑터 인스턴스화.
+    Windows + PyQt5 + 키움 OpenAPI+ OCX 가 셋업된 후 호출.
     """
-
-    def __init__(self, ocx):
-        # ocx = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1") 인스턴스
-        self.ocx = ocx
-        self._screen_no_counter = 5000
-
-    def _next_screen_no(self) -> str:
-        self._screen_no_counter = (self._screen_no_counter + 1) % 10_000
-        return str(max(self._screen_no_counter, 1000))
-
-    def get_login_account(self) -> str:
-        return self.ocx.dynamicCall("GetLoginInfo(QString)", "ACCNO").split(";")[0]
-
-    def get_account_balance(self) -> float:
-        # OPW00018 또는 OPW00001 호출 필요. 상세 구현은 키움 TR 명세 참조.
-        raise NotImplementedError("Implement with OPW00018 TR call")
-
-    def get_universe_amount_top(self, n: int = 50) -> list[str]:
-        # 권장: HTS 조건검색에 "거래대금 상위 50" 등록 후 SendCondition 호출
-        # 또는: 거래소별 전 종목 OPT10009 결과 정렬
-        raise NotImplementedError("Implement via SendCondition or OPT10009 loop")
-
-    def get_daily_chart(self, code: str, days: int = 60) -> pd.DataFrame:
-        # OPT10081 호출 → GetCommData 로 행 추출
-        raise NotImplementedError("Implement OPT10081 wrapper")
-
-    def get_minute_chart(self, code: str, interval: int = 1, count: int = 240) -> pd.DataFrame:
-        # OPT10080 호출. interval 은 분단위.
-        raise NotImplementedError("Implement OPT10080 wrapper")
-
-    def get_orderbook(self, code: str) -> dict:
-        raise NotImplementedError("Implement OPT10004 wrapper")
-
-    def send_buy_market(self, code: str, qty: int) -> str:
-        # SendOrder("매수주문", screen_no, account, 1, code, qty, 0, "03", "")
-        account = self.get_login_account()
-        ret = self.ocx.dynamicCall(
-            "SendOrder(QString,QString,QString,int,QString,int,int,QString,QString)",
-            ["BUY_M", self._next_screen_no(), account, 1, code, qty, 0, "03", ""],
-        )
-        return str(ret)
-
-    def send_sell_market(self, code: str, qty: int) -> str:
-        account = self.get_login_account()
-        ret = self.ocx.dynamicCall(
-            "SendOrder(QString,QString,QString,int,QString,int,int,QString,QString)",
-            ["SELL_M", self._next_screen_no(), account, 2, code, qty, 0, "03", ""],
-        )
-        return str(ret)
+    from .kiwoom_real import KiwoomAdapter as _Real
+    return _Real(ocx, **kwargs)
 
 
 # ============================================================================
-# Mock 어댑터 — 테스트/시뮬레이션용
+# Mock 어댑터 — 테스트/시뮬레이션용 (sandbox 에서 동작)
 # ============================================================================
 
 class MockKiwoomAdapter:
     """
     파일에 저장된 일봉 데이터로 키움을 흉내내는 mock.
-    pytest 및 plan.md Phase 5 백테스팅 통합 테스트에서 사용.
+    sandbox 시뮬레이션, pytest, plan.md Phase 5 통합 테스트에서 사용.
     """
 
-    def __init__(self, daily_panels: dict[str, pd.DataFrame], snapshot_dir: str | None = None):
+    def __init__(self, daily_panels: dict[str, pd.DataFrame],
+                 snapshot_dir: str | None = None):
         self.panels = daily_panels
         self.snapshot_dir = snapshot_dir
         self.orders_log: list[dict] = []
@@ -137,7 +86,6 @@ class MockKiwoomAdapter:
         return 10_000_000.0
 
     def get_universe_amount_top(self, n: int = 50) -> list[str]:
-        # 현재 날짜의 거래대금 상위 추출
         if self.current_date is None:
             return []
         today_amounts = []

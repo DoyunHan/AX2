@@ -240,19 +240,24 @@ self.ocx.dynamicCall("CommRqData(QString, QString, int, QString)",
 
 ## 11. 다음 단계 (Phase 2 진입 전 권장)
 
-1. **`pykiwoom` 또는 직접 wrapper 클래스 작성**
-   - 우리 `kiwoom/api/kiwoom_adapter.py` 의 `NotImplementedError` 메서드들을 채움
-   - `get_daily_chart`, `get_minute_chart`, `get_orderbook`, `send_buy_market`, etc.
-2. **OPT10081 (일봉) 으로 60일 데이터 받아 backtest 데이터 캐시 만들기**
-   - 본 sandbox 의 `data_cache/` 와 동일한 CSV 포맷으로 저장
+1. **`kiwoom/api/kiwoom_real.py` 의 KiwoomAdapter 검증** ✅ 코드 작성 완료
+   - 모든 TR (`OPT10001/10004/10080/10081`, `OPW00018`, `SendCondition`, `SendOrder`) 구현됨
+   - `kiwoom/tests/test_parsers.py` 로 응답 파싱 11종 단위 테스트 통과
+   - Windows 에서 첫 실행 시 `kiwoom/scripts/test_connection.py` → `get_daily_chart("005930")` 순으로 sanity check
+2. **HTS 에 "거래대금 상위 50" 조건검색 등록**
+   - 영웅문 → 조건검색 → 신규
+   - 거래대금 > 거래대금 상위 50위
+   - 이름은 `KiwoomAdapter(condition_name_amount_top=...)` 와 일치시킬 것
+3. **OPT10081 (일봉) 으로 1년 데이터 받아 backtest 데이터 캐시 만들기**
+   - 본 sandbox 의 `backtest/data_cache/` 와 동일한 CSV 포맷으로 저장
    - 1년 분량 = 약 250종목 × 1.5초/요청 = 6분
-3. **OPT10080 (분봉) 으로 마하세븐 거래 일자만 받아 진입 룰 검증**
+4. **OPT10080 (분봉) 으로 마하세븐 거래 일자만 받아 진입 룰 검증**
    - 백테스트의 `run_minute_synthetic.py` 의 `SyntheticMinuteGenerator` 를
-     실 데이터로 교체
-4. **모의투자 계정에서 봇 가동 — 1주일 paper trading**
-   - 본 `kiwoom/main.py` 의 `MachasevenBot` 을 실제 어댑터로 가동
+     `KiwoomMinuteSource` 로 교체 → 동일 EntryRule 들 (first_pullback, limit, etc.) 재검증
+5. **모의투자 계정에서 봇 가동 — 1주일 paper trading**
+   - `kiwoom/main.py` 의 `MachasevenBot` 을 실제 어댑터로 가동
    - 매일 종가 후 로그 검토, 룰대로 매매가 나가는지 확인
-5. **실계좌 소액 (100만원) 으로 1주일 운영**
+6. **실계좌 소액 (100만원) 으로 1주일 운영**
    - plan.md Phase 7 "점진적 실전 투입" 과 일치
    - 종목당 자본의 20% (= 20만원) × 동시 5종목 한도
 
