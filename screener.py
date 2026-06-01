@@ -6,22 +6,30 @@ overnight-gainers screener
 하룻밤에 급등할 "후보군"을 좁히는 미니 스크리너.
 
 핵심 철학(overnight-gainers-guide.html 참고): 이건 예측기가 아니라 *필터*다.
-폭등 가능성이 높은 조건(저플로팅 + 높은 공매도 + 갭 + 거래량 급증 + 가격대)을
-점수화해서 매일 후보 풀을 좁히는 용도다. "잡는" 게 아니라 "확률 게임"임을 잊지 말 것.
+폭등 가능성이 높은 조건(저플로팅 + 높은 공매도 + 갭 + 거래량 급증 + 소셜 거론량 +
+가격대)을 점수화해서 매일 후보 풀을 좁히는 용도다. "잡는" 게 아니라 "확률 게임"임을 잊지 말 것.
 
 데이터 소스
 -----------
+시세/펀더멘털:
 * yahoo : Yahoo Finance 공개 엔드포인트(API 키 불필요). 일반 네트워크에서 동작.
           - predefined screener: small_cap_gainers, day_gainers
           - quoteSummary defaultKeyStatistics: floatShares, shortPercentOfFloat ...
 * demo  : 네트워크 없이 동작하는 내장 샘플 데이터(이 스크립트 검증/시연용).
 
+소셜 거론량(밈/모멘텀 신호):
+* stocktwits : StockTwits 공개 API(키 불필요) — 종목별 최근 메시지 수/강세비율 +
+               trending 심볼. Reddit은 인증이 필요해 기본 미포함(확장 지점 표시).
+* demo       : 내장 합성 소셜 데이터.
+
 사용법
 ------
-    python3 screener.py --demo                 # 오프라인 시연
-    python3 screener.py                          # 라이브(Yahoo), 기본 필터
+    python3 screener.py --demo                  # 오프라인 시연(시세+소셜 모두 데모)
+    python3 screener.py                           # 라이브(Yahoo + StockTwits)
     python3 screener.py --max-float 20 --min-change 10 --limit 25
-    python3 screener.py --out candidates        # candidates.csv / candidates.json 저장
+    python3 screener.py --trending               # StockTwits 인기 심볼도 후보에 추가
+    python3 screener.py --social none            # 소셜 신호 끄기
+    python3 screener.py --out candidates         # candidates.csv / candidates.json 저장
 
 면책: 교육/정보 목적. 투자 권유 아님. 저플로팅 소형주는 손실 위험이 극단적이다.
 """
@@ -58,6 +66,10 @@ class Candidate:
     float_shares: Optional[float] = None       # 유통주식수
     short_pct_float: Optional[float] = None     # 공매도 비중 (% of float)
     catalyst: str = ""                          # 알려진 카탈리스트(있으면)
+    social_mentions: Optional[float] = None     # 최근 24h 거론 건수
+    social_baseline: Optional[float] = None     # 평소 거론 건수(기준선)
+    social_sentiment: Optional[float] = None    # -1(약세)~+1(강세), 강세메시지 비율 기반
+    social_source: str = ""                     # "stocktwits" | "demo" | ""
     score: float = 0.0
     flags: list = field(default_factory=list)
 
@@ -71,15 +83,23 @@ class Candidate:
     def float_millions(self) -> Optional[float]:
         return self.float_shares / 1e6 if self.float_shares else None
 
+    @property
+    def social_accel(self) -> Optional[float]:
+        """거론량 급증 배수(최근 / 평소). 기준선 없으면 None."""
+        if self.social_mentions is not None and self.social_baseline:
+            return self.social_mentions / self.social_baseline
+        return None
+
 
 # ──────────────────────────────────────────────────────────────────────────
 # 스코어링 — "예측"이 아니라 조건 충족도. 각 축 0~1로 정규화 후 가중합.
 # ──────────────────────────────────────────────────────────────────────────
 WEIGHTS = {
-    "low_float": 0.30,    # 유통주식 적을수록 ↑ (공급 부족 = 변동성)
-    "short":     0.25,    # 공매도 비중 높을수록 ↑ (스퀴즈 연료)
-    "gap":       0.20,    # 변동률 클수록 ↑ (모멘텀)
-    "rel_vol":   0.20,    # 거래량 급증할수록 ↑ (관심/수급)
+    "low_float": 0.25,    # 유통주식 적을수록 ↑ (공급 부족 = 변동성)
+    "short":     0.20,    # 공매도 비중 높을수록 ↑ (스퀴즈 연료)
+    "gap":       0.18,    # 변동률 클수록 ↑ (모멘텀)
+    "rel_vol":   0.17,    # 거래량 급증할수록 ↑ (관심/수급)
+    "social":    0.15,    # 소셜 거론량 급증 ↑ (밈/리테일 FOMO 연료)
     "price":     0.05,    # 적정 가격대($1~$20) 가산
 }
 
@@ -121,6 +141,23 @@ def score_candidate(c: Candidate) -> Candidate:
         s += WEIGHTS["rel_vol"] * r
         if rv >= 3:
             flags.append("VOL_SPIKE")
+
+    # 소셜 거론량: 평소 대비 급증(가속)이 우선, 기준선 없으면 절대 건수로 근사
+    accel = c.social_accel
+    if accel is not None:
+        # 1x→0, 5x+→1 (평소의 5배면 만점)
+        sv = _clamp((accel - 1) / 4)
+        s += WEIGHTS["social"] * sv
+        if accel >= 3:
+            flags.append("SOCIAL_SURGE")
+    elif c.social_mentions is not None:
+        # 기준선 모를 때: 24h 200건→0, 2000건+→1
+        sv = _clamp((c.social_mentions - 200) / 1800)
+        s += WEIGHTS["social"] * sv
+        if c.social_mentions >= 1000:
+            flags.append("SOCIAL_BUZZ")
+    if c.social_sentiment is not None and c.social_sentiment >= 0.6:
+        flags.append("BULLISH_CHATTER")
 
     # 가격대: $1~$20 선호(작은 절대가가 % 폭발 쉬움), 그 밖은 감점 없이 0
     if c.price is not None:
@@ -216,6 +253,90 @@ class YahooProvider:
 
 
 # ──────────────────────────────────────────────────────────────────────────
+# 소셜 거론량 소스 — 밈/리테일 모멘텀 신호
+# ──────────────────────────────────────────────────────────────────────────
+class StockTwitsSocial:
+    """StockTwits 공개 API(키 불필요). 종목별 최근 메시지 수/강세비율 + 인기 심볼.
+
+    주의: 공개 스트림은 최근 메시지 ~30개만 반환하므로 '평소 기준선'은 알 수 없다.
+    여기서는 24h 내 메시지 수를 절대 거론량으로 쓰고, bull/bear 비율로 sentiment를 만든다.
+    Reddit은 OAuth가 필요해 기본 미포함 — add_reddit() 자리에 확장하면 된다.
+    """
+    BASE = "https://api.stocktwits.com/api/2"
+
+    def __init__(self):
+        if requests is None:
+            raise RuntimeError("requests 모듈이 필요합니다: pip install requests")
+        self.s = requests.Session()
+        self.s.headers.update({"User-Agent": UA})
+
+    def trending(self, limit: int = 15) -> list[str]:
+        try:
+            r = self.s.get(f"{self.BASE}/trending/symbols.json",
+                           params={"limit": limit}, timeout=12)
+            r.raise_for_status()
+            return [s["symbol"] for s in r.json().get("symbols", [])]
+        except Exception as e:
+            print(f"  [warn] StockTwits trending 실패: {e}", file=sys.stderr)
+            return []
+
+    def attach(self, cands: list[Candidate]):
+        import datetime as dt
+        now = dt.datetime.now(dt.timezone.utc)
+        for c in cands:
+            try:
+                r = self.s.get(f"{self.BASE}/streams/symbol/{c.symbol}.json", timeout=12)
+                if not r.ok:
+                    continue
+                msgs = r.json().get("messages", [])
+                recent, bull, bear = 0, 0, 0
+                for m in msgs:
+                    ts = m.get("created_at", "")
+                    try:
+                        t = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                        if (now - t).total_seconds() <= 86400:
+                            recent += 1
+                    except Exception:
+                        recent += 1
+                    sent = ((m.get("entities") or {}).get("sentiment") or {}).get("basic")
+                    if sent == "Bullish":
+                        bull += 1
+                    elif sent == "Bearish":
+                        bear += 1
+                c.social_mentions = recent
+                if bull + bear:
+                    c.social_sentiment = round((bull - bear) / (bull + bear), 2)
+                c.social_source = "stocktwits"
+            except Exception:
+                continue
+
+
+class DemoSocial:
+    """오프라인 시연용 합성 소셜 데이터: sym -> (24h 거론, 평소 기준선, 강세도)."""
+    DATA = {
+        "MEME": (4200, 180, 0.78),   # 밈 폭발 + 강세 일색
+        "PUMP": (3100,  90, 0.66),   # 갑작스런 거론 급증(작전 가능성)
+        "SQZX": ( 520, 120, 0.58),   # PDUFA 앞두고 점증
+        "BIOX": ( 240,  70, 0.61),
+        "LOWF": ( 150, 110, 0.35),
+        "REVS": (  80,  60, 0.30),
+        "BIGC": ( 900, 850, 0.20),   # 거론은 많지만 평소와 비슷(가속 없음)
+    }
+
+    def trending(self, limit: int = 15) -> list[str]:
+        ranked = sorted(self.DATA, key=lambda k: self.DATA[k][0] / self.DATA[k][1],
+                        reverse=True)
+        return ranked[:limit]
+
+    def attach(self, cands: list[Candidate]):
+        for c in cands:
+            if c.symbol in self.DATA:
+                m, base, sent = self.DATA[c.symbol]
+                c.social_mentions, c.social_baseline, c.social_sentiment = m, base, sent
+                c.social_source = "demo"
+
+
+# ──────────────────────────────────────────────────────────────────────────
 # 데이터 소스: 내장 데모(오프라인) — 실제 값이 아니라 시연용 합성 데이터
 # ──────────────────────────────────────────────────────────────────────────
 def demo_candidates() -> list[Candidate]:
@@ -248,14 +369,23 @@ def fmt(v, suffix="", n=1):
     return f"{v}{suffix}"
 
 
+def _social_cell(c: Candidate) -> str:
+    if c.social_mentions is None:
+        return "—"
+    accel = c.social_accel
+    tail = f" ({accel:.0f}x)" if accel else ""
+    return f"{int(c.social_mentions)}{tail}"
+
+
 def print_table(cands: list[Candidate]):
-    hdr = ["#", "SYM", "PRICE", "CHG%", "RVOL", "FLOAT(M)", "SHORT%", "SCORE", "FLAGS"]
+    hdr = ["#", "SYM", "PRICE", "CHG%", "RVOL", "FLOAT(M)", "SHORT%", "SOCIAL",
+           "SCORE", "FLAGS"]
     rows = []
     for i, c in enumerate(cands, 1):
         rows.append([
             str(i), c.symbol, fmt(c.price, "", 2), fmt(c.change_pct, "%"),
             fmt(c.rel_volume, "x", 1), fmt(c.float_millions, "", 1),
-            fmt(c.short_pct_float, "%"), f"{c.score:.1f}",
+            fmt(c.short_pct_float, "%"), _social_cell(c), f"{c.score:.1f}",
             " ".join(c.flags),
         ])
     widths = [max(len(h), *(len(r[j]) for r in rows)) if rows else len(h)
@@ -273,7 +403,8 @@ def write_outputs(cands: list[Candidate], stem: str):
     with open(f"{stem}.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     cols = ["symbol", "name", "price", "change_pct", "rel_volume",
-            "float_shares", "short_pct_float", "market_cap", "catalyst", "score"]
+            "float_shares", "short_pct_float", "social_mentions",
+            "social_baseline", "social_sentiment", "market_cap", "catalyst", "score"]
     with open(f"{stem}.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(cols)
@@ -294,11 +425,18 @@ def main(argv=None):
     ap.add_argument("--min-change", type=float, default=5.0, help="최소 변동률(%%) 필터")
     ap.add_argument("--max-float", type=float, default=None, help="최대 유통주식(백만 주) 필터")
     ap.add_argument("--top", type=int, default=20, help="상위 N개만 출력")
+    ap.add_argument("--social", choices=["auto", "stocktwits", "demo", "none"],
+                    default="auto", help="소셜 거론량 소스(auto=provider에 맞춤)")
+    ap.add_argument("--trending", action="store_true",
+                    help="StockTwits 인기 심볼을 후보 풀에 추가")
     ap.add_argument("--out", default=None, help="결과 저장 파일명 stem(확장자 제외)")
     args = ap.parse_args(argv)
 
     provider = "demo" if args.demo else args.provider
-    print(f"[overnight-gainers screener] provider={provider}")
+    social_mode = args.social
+    if social_mode == "auto":
+        social_mode = "demo" if provider == "demo" else "stocktwits"
+    print(f"[overnight-gainers screener] provider={provider} social={social_mode}")
 
     if provider == "demo":
         cands = demo_candidates()
@@ -311,6 +449,24 @@ def main(argv=None):
         if not cands:
             print("[error] 후보를 못 가져왔습니다(네트워크 차단?). --demo 사용.", file=sys.stderr)
             return 1
+
+    # 소셜 거론량 보강 (+ --trending 시 인기 심볼을 후보로 추가)
+    social = None
+    if social_mode == "stocktwits":
+        try:
+            social = StockTwitsSocial()
+        except Exception as e:
+            print(f"  [warn] StockTwits 사용 불가: {e}", file=sys.stderr)
+    elif social_mode == "demo":
+        social = DemoSocial()
+    if social is not None:
+        if args.trending:
+            have = {c.symbol for c in cands}
+            for sym in social.trending():
+                if sym not in have:
+                    cands.append(Candidate(symbol=sym))
+                    have.add(sym)
+        social.attach(cands)
 
     # 필터
     if args.min_change is not None:
@@ -326,8 +482,8 @@ def main(argv=None):
     cands = cands[:args.top]
 
     print_table(cands)
-    print("점수=조건 충족도(0~100). 예측 아님. NO_CATALYST?=이유 불명(위험). "
-          "교육용·투자권유 아님.")
+    print("점수=조건 충족도(0~100). 예측 아님. SOCIAL=24h 거론(괄호=평소대비 배수). "
+          "SOCIAL_SURGE=거론 급증, NO_CATALYST?=이유 불명(위험). 교육용·투자권유 아님.")
     if args.out:
         write_outputs(cands, args.out)
     return 0
