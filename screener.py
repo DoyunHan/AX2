@@ -412,6 +412,7 @@ def write_outputs(cands: list[Candidate], stem: str):
             d = asdict(c) | {"rel_volume": c.rel_volume}
             w.writerow([d.get(k) for k in cols])
     print(f"[saved] {stem}.json / {stem}.csv")
+    print(f"        → results.html 에서 {stem}.json 을 불러오면 표/점수바로 볼 수 있음")
 
 
 # ──────────────────────────────────────────────────────────────────────────

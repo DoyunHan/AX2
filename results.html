@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스크리너 결과 — Screener Results</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --bg:#0a0e14; --surface:#131820; --surface2:#1a2030; --border:#1e2a3a;
+    --text:#c5d0dc; --dim:#5c6a7a; --accent:#6c63ff; --accent-glow:rgba(108,99,255,.3);
+    --green:#3ddc84; --yellow:#ffc107; --red:#ff5252; --blue:#40c4ff; --orange:#ff9100; --violet:#b388ff;
+  }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter','JetBrains Mono',sans-serif; font-size:14px; line-height:1.6; min-height:100vh;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .scanline{position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px); pointer-events:none; z-index:9999;}
+
+  header{ background:linear-gradient(180deg,var(--surface),var(--bg)); border-bottom:1px solid var(--border); padding:30px 24px 24px; position:relative; overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 28% 0%,var(--accent-glow),transparent 70%);opacity:.5;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+  .tag{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); border:1px solid var(--border); border-radius:999px; padding:5px 14px; margin-bottom:12px; position:relative;}
+  header h1{font-size:1.7rem; font-weight:700; letter-spacing:-.02em; position:relative;}
+  header p{color:var(--dim); margin-top:6px; position:relative; font-size:13px;}
+
+  main{max-width:1180px; margin:0 auto; padding:22px 24px 80px;}
+
+  /* 데이터 로드 영역 */
+  .loader{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; background:var(--surface); border:1px dashed var(--border); border-radius:10px; padding:14px 18px; margin-bottom:18px; transition:.15s;}
+  .loader.drag{ border-color:var(--accent); background:var(--surface2);}
+  .loader .hint{ color:var(--dim); font-size:12.5px; flex:1; min-width:200px;}
+  .loader .hint b{color:var(--text);}
+  .btn{ font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:8px 14px; cursor:pointer; transition:.15s;}
+  .btn:hover{ border-color:var(--accent); color:#fff;}
+  .src{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim);}
+  .src b{color:var(--green);}
+
+  /* 요약 카드 */
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px;}
+  .stat{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px;}
+  .stat .k{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);}
+  .stat .v{ font-size:1.6rem; font-weight:700; color:#e7eef6; margin-top:4px; font-family:'JetBrains Mono',monospace;}
+  .stat .v small{font-size:.8rem; color:var(--dim); font-weight:400;}
+
+  /* 컨트롤 */
+  .controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px;}
+  .controls input, .controls select{ background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:8px 12px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px;}
+  .controls input:focus, .controls select:focus{outline:none; border-color:var(--accent);}
+  .controls label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim);}
+  .controls .spacer{flex:1;}
+
+  /* 테이블 */
+  .tablewrap{ background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:auto;}
+  table{ width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{ padding:11px 12px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap;}
+  th{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--dim); background:var(--surface2); cursor:pointer; user-select:none; position:sticky; top:0;}
+  th:hover{color:var(--text);}
+  th .ar{opacity:.5; font-size:9px;}
+  tbody tr:hover{ background:rgba(255,255,255,.02);}
+  td.sym{ font-family:'JetBrains Mono',monospace; font-weight:700; color:#e7eef6;}
+  td.num{ font-family:'JetBrains Mono',monospace; text-align:right;}
+  td .name{color:var(--dim); font-size:11px; font-weight:400;}
+  .pos{color:var(--green);} .neg{color:var(--red);}
+
+  /* 점수 바 */
+  .scorecell{display:flex; align-items:center; gap:8px; min-width:120px;}
+  .bar{ flex:1; height:7px; background:var(--surface2); border-radius:4px; overflow:hidden;}
+  .bar > i{ display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,var(--blue),var(--accent));}
+  .scoreval{font-family:'JetBrains Mono',monospace; font-weight:700; width:38px; text-align:right;}
+
+  /* 플래그 칩 */
+  .flags{display:flex; flex-wrap:wrap; gap:4px; white-space:normal; max-width:320px;}
+  .chip{ font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.04em; padding:2px 7px; border-radius:4px; background:var(--surface2); color:var(--dim);}
+  .chip.good{ background:rgba(61,220,132,.14); color:var(--green);}
+  .chip.warn{ background:rgba(255,82,82,.16); color:var(--red);}
+  .chip.info{ background:rgba(64,196,255,.14); color:var(--blue);}
+
+  .empty{ padding:40px; text-align:center; color:var(--dim); font-family:'JetBrains Mono',monospace;}
+  .disclaimer{ border-left:3px solid var(--red); background:rgba(255,82,82,.1); border-radius:0 8px 8px 0; padding:13px 18px; margin-top:20px; font-size:12px; color:var(--text);}
+  .disclaimer .lbl{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; opacity:.85;}
+  footer{text-align:center; padding:34px 24px; color:var(--dim); font-size:.78rem; font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<header>
+  <div class="wrap">
+    <span class="tag">Screener Results · screener.py 결과 뷰어</span>
+    <h1>스크리너 결과 대시보드</h1>
+    <p><code class="mono">python3 screener.py --out candidates</code> 로 만든 <b class="mono">candidates.json</b> 을 불러와 순위·점수·플래그를 봅니다.</p>
+  </div>
+</header>
+
+<main>
+  <div class="loader" id="loader">
+    <div class="hint">
+      <b>candidates.json</b> 파일을 여기로 끌어다 놓거나 선택하세요.
+      (브라우저로 직접 열면 보안정책상 자동 로드가 막힙니다 → 파일을 직접 불러오세요.)
+    </div>
+    <input type="file" id="fileInput" accept=".json,.csv" style="display:none">
+    <button class="btn" onclick="document.getElementById('fileInput').click()">파일 선택</button>
+    <button class="btn" onclick="tryAutoLoad()">./candidates.json 자동로드</button>
+    <span class="src" id="src">source: <b>내장 데모</b></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="controls">
+    <input id="search" placeholder="티커/이름 검색…" oninput="render()">
+    <label>최소점수</label>
+    <input id="minScore" type="number" value="0" min="0" max="100" style="width:70px" oninput="render()">
+    <label><input type="checkbox" id="onlyCatalyst" onchange="render()"> 카탈리스트만</label>
+    <div class="spacer"></div>
+    <span class="src" id="count"></span>
+  </div>
+
+  <div class="tablewrap">
+    <table id="tbl">
+      <thead><tr id="thead"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="disclaimer">
+    <span class="lbl">Disclaimer</span>
+    점수는 <b>예측이 아니라 조건 충족도(0~100)</b>입니다. <code class="mono">NO_CATALYST?</code>(이유 불명)·<code class="mono">SUB_DOLLAR</code> 등은 위험 신호입니다. 교육·정보 목적이며 투자 권유가 아닙니다.
+  </div>
+</main>
+
+<footer>AX2 · Screener Results Viewer · Not financial advice</footer>
+
+<script>
+// ── 컬럼 정의 ────────────────────────────────────────────────
+const COLS = [
+  {key:"rank",  label:"#",        align:"left",  fmt:(v,r,i)=>String(i+1)},
+  {key:"symbol",label:"SYM",      align:"left",  cls:"sym",
+     fmt:r=>`${r.symbol}<div class="name">${r.name||""}</div>`},
+  {key:"price", label:"PRICE",    align:"num",   fmt:r=>num(r.price,2,"$")},
+  {key:"change_pct",label:"CHG%", align:"num",   fmt:r=>signed(r.change_pct)},
+  {key:"rel_volume",label:"RVOL", align:"num",   fmt:r=>num(r.rel_volume,1,"","x")},
+  {key:"float_shares",label:"FLOAT(M)",align:"num",fmt:r=>num(r.float_shares?r.float_shares/1e6:null,1)},
+  {key:"short_pct_float",label:"SHORT%",align:"num",fmt:r=>num(r.short_pct_float,1,"","%")},
+  {key:"social_mentions",label:"SOCIAL",align:"num",fmt:r=>social(r)},
+  {key:"score", label:"SCORE",    align:"left",  fmt:r=>scoreBar(r.score)},
+  {key:"flags", label:"FLAGS",    align:"left",  fmt:r=>flagChips(r.flags)},
+];
+
+// ── 포맷 헬퍼 ────────────────────────────────────────────────
+function num(v,n=1,pre="",suf=""){ if(v==null||isNaN(v)) return "—"; return pre+Number(v).toLocaleString(undefined,{minimumFractionDigits:n,maximumFractionDigits:n})+suf; }
+function signed(v){ if(v==null||isNaN(v)) return "—"; const c=v>=0?"pos":"neg"; const s=v>=0?"+":""; return `<span class="${c}">${s}${Number(v).toFixed(1)}%</span>`; }
+function social(r){ if(r.social_mentions==null) return "—"; const acc=(r.social_mentions&&r.social_baseline)?` (${(r.social_mentions/r.social_baseline).toFixed(0)}x)`:""; return `${Math.round(r.social_mentions)}${acc}`; }
+function scoreBar(s){ if(s==null) return "—"; const w=Math.max(0,Math.min(100,s)); return `<div class="scorecell"><div class="bar"><i style="width:${w}%"></i></div><span class="scoreval">${Number(s).toFixed(0)}</span></div>`; }
+const GOOD=new Set(["CATALYST","LOW_FLOAT","HIGH_SHORT","BIG_GAP","VOL_SPIKE","SOCIAL_SURGE","BULLISH_CHATTER","SOCIAL_BUZZ"]);
+const WARN=new Set(["NO_CATALYST?","SUB_DOLLAR"]);
+function flagChips(flags){ if(!flags||!flags.length) return "—"; return `<div class="flags">`+flags.map(f=>{ let c="info"; if(WARN.has(f))c="warn"; else if(GOOD.has(f))c="good"; return `<span class="chip ${c}">${f}</span>`; }).join("")+`</div>`; }
+
+// ── 상태 ────────────────────────────────────────────────────
+let DATA = [];
+let sortKey = "score", sortDir = -1;
+
+// 내장 데모(첫 화면용) — screener.py --demo 출력과 동일 형태
+const DEMO = [
+  {symbol:"SQZX",name:"Squeezeco Bio",price:3.40,change_pct:28.0,rel_volume:15.0,float_shares:6.5e6,short_pct_float:31.0,social_mentions:520,social_baseline:120,social_sentiment:0.58,score:87.9,flags:["LOW_FLOAT","HIGH_SHORT","BIG_GAP","VOL_SPIKE","SOCIAL_SURGE","CATALYST"]},
+  {symbol:"LOWF",name:"LowFloat Mining",price:1.85,change_pct:62.0,rel_volume:27.5,float_shares:4.2e6,short_pct_float:24.0,social_mentions:150,social_baseline:110,social_sentiment:0.35,score:82.4,flags:["LOW_FLOAT","HIGH_SHORT","BIG_GAP","VOL_SPIKE","NO_CATALYST?"]},
+  {symbol:"REVS",name:"RevSplit Corp",price:2.05,change_pct:41.0,rel_volume:23.3,float_shares:3.1e6,short_pct_float:27.0,social_mentions:80,social_baseline:60,social_sentiment:0.30,score:80.7,flags:["LOW_FLOAT","HIGH_SHORT","BIG_GAP","VOL_SPIKE","CATALYST"]},
+  {symbol:"PUMP",name:"Hype Holdings",price:0.74,change_pct:140.0,rel_volume:190.0,float_shares:9.8e6,short_pct_float:8.0,social_mentions:3100,social_baseline:90,social_sentiment:0.66,score:77.7,flags:["LOW_FLOAT","BIG_GAP","VOL_SPIKE","SOCIAL_SURGE","BULLISH_CHATTER","SUB_DOLLAR","NO_CATALYST?"]},
+  {symbol:"BIOX",name:"BioCat Therap",price:7.20,change_pct:18.0,rel_volume:4.3,float_shares:22.0e6,short_pct_float:12.0,social_mentions:240,social_baseline:70,social_sentiment:0.61,score:57.0,flags:["VOL_SPIKE","SOCIAL_SURGE","BULLISH_CHATTER","CATALYST"]},
+  {symbol:"MEME",name:"MemeStonk Inc",price:12.10,change_pct:9.5,rel_volume:4.0,float_shares:35.0e6,short_pct_float:19.0,social_mentions:4200,social_baseline:180,social_sentiment:0.78,score:55.6,flags:["VOL_SPIKE","SOCIAL_SURGE","BULLISH_CHATTER","CATALYST"]},
+  {symbol:"BIGC",name:"BigCap Stable",price:88.00,change_pct:6.0,rel_volume:1.1,float_shares:400e6,short_pct_float:2.0,social_mentions:900,social_baseline:850,social_sentiment:0.20,score:2.3,flags:["CATALYST"]},
+];
+
+// ── 로딩 ────────────────────────────────────────────────────
+function setData(arr, label){
+  DATA = arr.map(r=>({...r, rel_volume: r.rel_volume ?? ((r.volume&&r.avg_volume)? r.volume/r.avg_volume : null)}));
+  document.getElementById("src").innerHTML = "source: <b>"+label+"</b>";
+  render();
+}
+function parseCSV(text){
+  const lines=text.trim().split(/\r?\n/); const head=lines[0].split(",");
+  return lines.slice(1).map(l=>{ const cells=l.split(","); const o={}; head.forEach((h,i)=>{ let v=cells[i]; if(v!==undefined&&v!==""&&!isNaN(v)&&h!=="symbol"&&h!=="name") v=Number(v); o[h.trim()]=v; }); if(typeof o.flags==="string") o.flags=o.flags? o.flags.split(/[ ;|]+/).filter(Boolean):[]; return o; });
+}
+function loadFile(file){
+  const reader=new FileReader();
+  reader.onload=e=>{ try{ const t=e.target.result; const arr= file.name.endsWith(".csv")? parseCSV(t): JSON.parse(t); setData(Array.isArray(arr)?arr:[], file.name); }catch(err){ alert("파싱 실패: "+err.message); } };
+  reader.readAsText(file);
+}
+function tryAutoLoad(){
+  fetch("./candidates.json").then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(a=>setData(a,"candidates.json (auto)"))
+    .catch(e=>alert("자동 로드 실패("+e.message+").\nfile://로 열면 막힙니다 — '파일 선택'으로 직접 불러오거나, 폴더에서 로컬 서버(python3 -m http.server)로 여세요."));
+}
+
+// 드래그&드롭 + 파일 입력
+const loader=document.getElementById("loader");
+["dragenter","dragover"].forEach(ev=>loader.addEventListener(ev,e=>{e.preventDefault(); loader.classList.add("drag");}));
+["dragleave","drop"].forEach(ev=>loader.addEventListener(ev,e=>{e.preventDefault(); loader.classList.remove("drag");}));
+loader.addEventListener("drop",e=>{ if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+document.getElementById("fileInput").addEventListener("change",e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+
+// ── 렌더 ────────────────────────────────────────────────────
+function buildHead(){
+  const tr=document.getElementById("thead"); tr.innerHTML="";
+  COLS.forEach(c=>{ const th=document.createElement("th"); const ar= sortKey===c.key? (sortDir<0?" ▼":" ▲"):""; th.innerHTML=c.label+`<span class="ar">${ar}</span>`; if(c.key!=="rank"&&c.key!=="flags") th.onclick=()=>{ if(sortKey===c.key) sortDir*=-1; else {sortKey=c.key; sortDir=-1;} render(); }; tr.appendChild(th); });
+}
+function render(){
+  buildHead();
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  const minS=Number(document.getElementById("minScore").value)||0;
+  const onlyCat=document.getElementById("onlyCatalyst").checked;
+  let rows=DATA.filter(r=> (!q || (r.symbol+" "+(r.name||"")).toLowerCase().includes(q)) && (Number(r.score)||0)>=minS && (!onlyCat || (r.flags||[]).includes("CATALYST")) );
+  rows.sort((a,b)=>{ let x=a[sortKey], y=b[sortKey]; if(x==null)x=-Infinity; if(y==null)y=-Infinity; if(typeof x==="string") return sortDir*x.localeCompare(y); return sortDir*((x>y)?1:(x<y)?-1:0); });
+
+  const tb=document.getElementById("tbody"); tb.innerHTML="";
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="${COLS.length}"><div class="empty">표시할 데이터 없음. candidates.json을 불러오세요.</div></td></tr>`; }
+  rows.forEach((r,i)=>{ const tr=document.createElement("tr"); tr.innerHTML=COLS.map(c=>{ const v=c.fmt(r,r,i); return `<td class="${c.align==='num'?'num':''} ${c.cls||''}">${v}</td>`; }).join(""); tb.appendChild(tr); });
+
+  document.getElementById("count").textContent=`${rows.length} / ${DATA.length} rows`;
+  renderStats(rows);
+}
+function renderStats(rows){
+  const box=document.getElementById("stats");
+  const n=rows.length;
+  const avg= n? (rows.reduce((s,r)=>s+(Number(r.score)||0),0)/n):0;
+  const top= rows.length? rows.reduce((a,b)=>((Number(b.score)||0)>(Number(a.score)||0)?b:a)) : null;
+  const cat= rows.filter(r=>(r.flags||[]).includes("CATALYST")).length;
+  const risk= rows.filter(r=>(r.flags||[]).includes("NO_CATALYST?")).length;
+  const cards=[
+    ["후보 수", n],
+    ["평균 점수", avg.toFixed(1)],
+    ["최고 점수", top? `${Number(top.score).toFixed(0)} <small>${top.symbol}</small>`:"—"],
+    ["카탈리스트 보유", `${cat} <small>/ ${n}</small>`],
+    ["이유 불명(위험)", `${risk} <small>/ ${n}</small>`],
+  ];
+  box.innerHTML=cards.map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+}
+
+// 초기: 내장 데모
+setData(DEMO, "내장 데모");
+</script>
+</body>
+</html>
