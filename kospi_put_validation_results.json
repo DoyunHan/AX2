@@ -1,0 +1,45 @@
+{
+  "real_cases": [
+    {
+      "date": "2018-10-11",
+      "event": "10월 옵션만기일 급락(옵션쇼크형)",
+      "k200_drop_pct": -4.4,
+      "option": "풋 행사가 280 (만기 당일)",
+      "prev": 0.01,
+      "close": 4.0,
+      "mult": 400.0,
+      "src": "Steemit/나무위키 KOSPI200 — '전일 0.01 → 4.00(400배)'",
+      "insight": "만기 당일 딥OTM 풋이 0.01 바닥에서 내재가치로 점프. 시간가치 0, 순수 델타."
+    },
+    {
+      "date": "2025-11-14",
+      "event": "지수 4%대 급락",
+      "k200_drop_pct": -4.28,
+      "option": "코스피200 풋(월물) / 위클리 풋",
+      "prev": null,
+      "close": null,
+      "mult": null,
+      "mult_month": 2.2,
+      "mult_weekly": 14.55,
+      "src": "글로벌이코노믹 — 풋 +120%, 위클리 풋 +1354.84%",
+      "insight": "같은 급락에도 만기 짧은 위클리(시간가치 작음)가 월물보다 훨씬 큰 배수."
+    }
+  ],
+  "validation_400x": {
+    "prev": 0.01,
+    "close": 4.0,
+    "model_mult": 400.0
+  },
+  "skew_recheck_2020_10otm": {
+    "flat": {
+      "entry": 0.54,
+      "exit": 531.7,
+      "mult": 983.0
+    },
+    "skew": {
+      "entry": 4.1,
+      "exit": 533.6,
+      "mult": 130.0
+    }
+  }
+}
