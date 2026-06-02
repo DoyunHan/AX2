@@ -1,0 +1,396 @@
+{
+  "assumptions": {
+    "entry_dte_days": 45,
+    "model": "Black-Scholes (European put)",
+    "otm_levels": [
+      0.0,
+      0.025,
+      0.05,
+      0.075,
+      0.1
+    ],
+    "monthly_5otm_premium_pct": 0.212
+  },
+  "events": [
+    {
+      "key": "2008_GFC",
+      "name": "2008 글로벌 금융위기",
+      "desc": "리먼 사태 → 신용경색. 코스피 사상최고(2,064.85, 07-10-31) 대비 -54.5%.",
+      "note": "VKOSPI 도입 전. IV는 당시 실현변동성 기반 추정.",
+      "entry_date": "2008-09-24",
+      "trough_date": "2008-10-24",
+      "entry_level": 1430.0,
+      "trough_level": 938.75,
+      "held_days": 30,
+      "drop_pct": -34.4,
+      "iv_entry": 0.3,
+      "iv_exit": 0.7,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 1430.0,
+          "entry_prem": 55.59,
+          "exit_prem": 488.389,
+          "exit_delta_only": 488.315,
+          "intrinsic": 491.25,
+          "mult_full": 8.79,
+          "mult_delta_only": 8.78,
+          "mult_intrinsic": 8.84,
+          "ret_full_pct": 778.6
+        },
+        {
+          "otm": 0.025,
+          "strike": 1394.25,
+          "entry_prem": 39.595,
+          "exit_prem": 452.773,
+          "exit_delta_only": 452.638,
+          "intrinsic": 455.5,
+          "mult_full": 11.44,
+          "mult_delta_only": 11.43,
+          "mult_intrinsic": 11.5,
+          "ret_full_pct": 1043.5
+        },
+        {
+          "otm": 0.05,
+          "strike": 1358.5,
+          "entry_prem": 26.931,
+          "exit_prem": 417.203,
+          "exit_delta_only": 416.961,
+          "intrinsic": 419.75,
+          "mult_full": 15.49,
+          "mult_delta_only": 15.48,
+          "mult_intrinsic": 15.59,
+          "ret_full_pct": 1449.2
+        },
+        {
+          "otm": 0.075,
+          "strike": 1322.75,
+          "entry_prem": 17.389,
+          "exit_prem": 381.711,
+          "exit_delta_only": 381.285,
+          "intrinsic": 384.0,
+          "mult_full": 21.95,
+          "mult_delta_only": 21.93,
+          "mult_intrinsic": 22.08,
+          "ret_full_pct": 2095.2
+        },
+        {
+          "otm": 0.1,
+          "strike": 1287.0,
+          "entry_prem": 10.59,
+          "exit_prem": 346.349,
+          "exit_delta_only": 345.608,
+          "intrinsic": 348.25,
+          "mult_full": 32.7,
+          "mult_delta_only": 32.63,
+          "mult_intrinsic": 32.88,
+          "ret_full_pct": 3170.4
+        }
+      ]
+    },
+    {
+      "key": "2011_EU",
+      "name": "2011 유럽 재정위기·美 신용강등",
+      "desc": "S&P의 미국 신용등급 강등 + 유로존 위기. 8/2~8/9 6거래일 연속 -2%대.",
+      "note": "옵션 수명 내 저점(8/19). 이후 9월 말 1,652까지 추가 하락.",
+      "entry_date": "2011-08-01",
+      "trough_date": "2011-08-19",
+      "entry_level": 2172.0,
+      "trough_level": 1744.0,
+      "held_days": 18,
+      "drop_pct": -19.7,
+      "iv_entry": 0.2,
+      "iv_exit": 0.42,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2172.0,
+          "entry_prem": 56.472,
+          "exit_prem": 425.235,
+          "exit_delta_only": 422.785,
+          "intrinsic": 428.0,
+          "mult_full": 7.53,
+          "mult_delta_only": 7.49,
+          "mult_intrinsic": 7.58,
+          "ret_full_pct": 653.0
+        },
+        {
+          "otm": 0.025,
+          "strike": 2117.7,
+          "entry_prem": 33.725,
+          "exit_prem": 372.834,
+          "exit_delta_only": 368.62,
+          "intrinsic": 373.7,
+          "mult_full": 11.06,
+          "mult_delta_only": 10.93,
+          "mult_intrinsic": 11.08,
+          "ret_full_pct": 1005.5
+        },
+        {
+          "otm": 0.05,
+          "strike": 2063.4,
+          "entry_prem": 18.225,
+          "exit_prem": 321.52,
+          "exit_delta_only": 314.479,
+          "intrinsic": 319.4,
+          "mult_full": 17.64,
+          "mult_delta_only": 17.25,
+          "mult_intrinsic": 17.52,
+          "ret_full_pct": 1664.1
+        },
+        {
+          "otm": 0.075,
+          "strike": 2009.1,
+          "entry_prem": 8.777,
+          "exit_prem": 271.816,
+          "exit_delta_only": 260.446,
+          "intrinsic": 265.1,
+          "mult_full": 30.97,
+          "mult_delta_only": 29.67,
+          "mult_intrinsic": 30.2,
+          "ret_full_pct": 2996.7
+        },
+        {
+          "otm": 0.1,
+          "strike": 1954.8,
+          "entry_prem": 3.707,
+          "exit_prem": 224.391,
+          "exit_delta_only": 206.843,
+          "intrinsic": 210.8,
+          "mult_full": 60.54,
+          "mult_delta_only": 55.8,
+          "mult_intrinsic": 56.87,
+          "ret_full_pct": 5953.5
+        }
+      ]
+    },
+    {
+      "key": "2018_TRADE",
+      "name": "2018 미·중 무역분쟁 (검은 10월)",
+      "desc": "연초 사상최고(2,598.19, 01-29) 후 무역전쟁·금리인상 우려로 조정.",
+      "note": "상대적으로 완만한 -15% 조정. VKOSPI 28 부근.",
+      "entry_date": "2018-10-01",
+      "trough_date": "2018-10-29",
+      "entry_level": 2338.88,
+      "trough_level": 1996.05,
+      "held_days": 28,
+      "drop_pct": -14.7,
+      "iv_entry": 0.14,
+      "iv_exit": 0.28,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2338.88,
+          "entry_prem": 43.692,
+          "exit_prem": 341.381,
+          "exit_delta_only": 341.197,
+          "intrinsic": 342.83,
+          "mult_full": 7.81,
+          "mult_delta_only": 7.81,
+          "mult_intrinsic": 7.85,
+          "ret_full_pct": 681.3
+        },
+        {
+          "otm": 0.025,
+          "strike": 2280.41,
+          "entry_prem": 20.643,
+          "exit_prem": 283.409,
+          "exit_delta_only": 282.765,
+          "intrinsic": 284.358,
+          "mult_full": 13.73,
+          "mult_delta_only": 13.7,
+          "mult_intrinsic": 13.77,
+          "ret_full_pct": 1272.9
+        },
+        {
+          "otm": 0.05,
+          "strike": 2221.94,
+          "entry_prem": 7.973,
+          "exit_prem": 226.328,
+          "exit_delta_only": 224.338,
+          "intrinsic": 225.886,
+          "mult_full": 28.39,
+          "mult_delta_only": 28.14,
+          "mult_intrinsic": 28.33,
+          "ret_full_pct": 2738.7
+        },
+        {
+          "otm": 0.075,
+          "strike": 2163.46,
+          "entry_prem": 2.428,
+          "exit_prem": 171.363,
+          "exit_delta_only": 165.983,
+          "intrinsic": 167.414,
+          "mult_full": 70.59,
+          "mult_delta_only": 68.37,
+          "mult_intrinsic": 68.96,
+          "ret_full_pct": 6958.6
+        },
+        {
+          "otm": 0.1,
+          "strike": 2104.99,
+          "entry_prem": 0.562,
+          "exit_prem": 120.653,
+          "exit_delta_only": 108.509,
+          "intrinsic": 108.942,
+          "mult_full": 214.69,
+          "mult_delta_only": 193.08,
+          "mult_intrinsic": 193.86,
+          "ret_full_pct": 21369.5
+        }
+      ]
+    },
+    {
+      "key": "2020_COVID",
+      "name": "2020 코로나 팬데믹 쇼크",
+      "desc": "한 달 만에 -34%. VKOSPI 사상최고 69.24(장중 ~71). 교과서적 사례.",
+      "note": "지수 급락 + IV 폭등이 동시 발생한 최적 사례.",
+      "entry_date": "2020-02-19",
+      "trough_date": "2020-03-19",
+      "entry_level": 2210.0,
+      "trough_level": 1457.64,
+      "held_days": 29,
+      "drop_pct": -34.0,
+      "iv_entry": 0.14,
+      "iv_exit": 0.69,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2210.0,
+          "entry_prem": 41.622,
+          "exit_prem": 751.301,
+          "exit_delta_only": 751.149,
+          "intrinsic": 752.36,
+          "mult_full": 18.05,
+          "mult_delta_only": 18.05,
+          "mult_intrinsic": 18.08,
+          "ret_full_pct": 1705.1
+        },
+        {
+          "otm": 0.025,
+          "strike": 2154.75,
+          "entry_prem": 19.705,
+          "exit_prem": 696.199,
+          "exit_delta_only": 695.93,
+          "intrinsic": 697.11,
+          "mult_full": 35.33,
+          "mult_delta_only": 35.32,
+          "mult_intrinsic": 35.38,
+          "ret_full_pct": 3433.2
+        },
+        {
+          "otm": 0.05,
+          "strike": 2099.5,
+          "entry_prem": 7.628,
+          "exit_prem": 641.182,
+          "exit_delta_only": 640.71,
+          "intrinsic": 641.86,
+          "mult_full": 84.06,
+          "mult_delta_only": 84.0,
+          "mult_intrinsic": 84.15,
+          "ret_full_pct": 8305.8
+        },
+        {
+          "otm": 0.075,
+          "strike": 2044.25,
+          "entry_prem": 2.329,
+          "exit_prem": 586.306,
+          "exit_delta_only": 585.49,
+          "intrinsic": 586.61,
+          "mult_full": 251.77,
+          "mult_delta_only": 251.42,
+          "mult_intrinsic": 251.9,
+          "ret_full_pct": 25077.3
+        },
+        {
+          "otm": 0.1,
+          "strike": 1989.0,
+          "entry_prem": 0.541,
+          "exit_prem": 531.661,
+          "exit_delta_only": 530.27,
+          "intrinsic": 531.36,
+          "mult_full": 983.49,
+          "mult_delta_only": 980.91,
+          "mult_intrinsic": 982.93,
+          "ret_full_pct": 98248.6
+        }
+      ]
+    },
+    {
+      "key": "2024_YEN",
+      "name": "2024.8 엔캐리 청산 (블랙 먼데이)",
+      "desc": "8/5 하루 -8.77%(역대 최대 낙폭, 종가 2,441.55). VKOSPI 하루 +110% → 45.86.",
+      "note": "초단기 급락. 며칠 만에 반등 → '저점 매도(익절)' 타이밍이 관건.",
+      "entry_date": "2024-07-11",
+      "trough_date": "2024-08-05",
+      "entry_level": 2891.35,
+      "trough_level": 2441.55,
+      "held_days": 25,
+      "drop_pct": -15.6,
+      "iv_entry": 0.16,
+      "iv_exit": 0.46,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2891.35,
+          "entry_prem": 58.62,
+          "exit_prem": 451.676,
+          "exit_delta_only": 444.26,
+          "intrinsic": 449.8,
+          "mult_full": 7.71,
+          "mult_delta_only": 7.58,
+          "mult_intrinsic": 7.67,
+          "ret_full_pct": 670.5
+        },
+        {
+          "otm": 0.025,
+          "strike": 2819.07,
+          "entry_prem": 30.315,
+          "exit_prem": 384.484,
+          "exit_delta_only": 372.117,
+          "intrinsic": 377.516,
+          "mult_full": 12.68,
+          "mult_delta_only": 12.27,
+          "mult_intrinsic": 12.45,
+          "ret_full_pct": 1168.3
+        },
+        {
+          "otm": 0.05,
+          "strike": 2746.78,
+          "entry_prem": 13.416,
+          "exit_prem": 319.985,
+          "exit_delta_only": 299.996,
+          "intrinsic": 305.232,
+          "mult_full": 23.85,
+          "mult_delta_only": 22.36,
+          "mult_intrinsic": 22.75,
+          "ret_full_pct": 2285.1
+        },
+        {
+          "otm": 0.075,
+          "strike": 2674.5,
+          "entry_prem": 4.95,
+          "exit_prem": 259.214,
+          "exit_delta_only": 228.099,
+          "intrinsic": 232.949,
+          "mult_full": 52.37,
+          "mult_delta_only": 46.08,
+          "mult_intrinsic": 47.06,
+          "ret_full_pct": 5137.1
+        },
+        {
+          "otm": 0.1,
+          "strike": 2602.22,
+          "entry_prem": 1.482,
+          "exit_prem": 203.339,
+          "exit_delta_only": 157.624,
+          "intrinsic": 160.665,
+          "mult_full": 137.2,
+          "mult_delta_only": 106.36,
+          "mult_intrinsic": 108.41,
+          "ret_full_pct": 13620.2
+        }
+      ]
+    }
+  ]
+}

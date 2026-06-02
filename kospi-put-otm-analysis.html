@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코스피 외가격 풋옵션 매수 — 과거 폭락 사례 데이터 검증</title>
+<style>
+  :root{
+    --bg-0:#0a0c16; --bg-1:#0e1120; --bg-2:#141829; --bg-3:#1b2036; --bg-4:#232a44;
+    --line:#2a3252; --text:#e8eaf2; --text-2:#a9b0c8; --text-3:#6b7493;
+    --accent:#5b8cff; --accent-2:#8a6cff; --pos:#34d399; --neg:#ff5b6e;
+    --warn:#fbbf45; --gold:#e7c46a;
+    --serif:'Cormorant Garamond',Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg-0);color:var(--text);font-family:var(--sans);
+    font-weight:400;line-height:1.7;letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent);text-decoration:none}
+
+  /* hero */
+  .hero{padding:120px 0 80px;position:relative;overflow:hidden;
+    background:radial-gradient(1200px 500px at 70% -10%,rgba(91,140,255,.16),transparent 60%),
+               radial-gradient(900px 400px at 10% 10%,rgba(138,108,255,.12),transparent 55%)}
+  .eyebrow{font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+    font-weight:600;margin-bottom:22px}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);font-weight:700;line-height:1.12;letter-spacing:-0.03em;
+    max-width:18ch;margin-bottom:24px}
+  h1 .hl{background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{font-size:1.18rem;color:var(--text-2);max-width:60ch;font-weight:300}
+  .hero-stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:48px}
+  .hstat{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:20px 26px;min-width:170px}
+  .hstat .n{font-family:var(--serif);font-size:2.6rem;font-weight:600;line-height:1}
+  .hstat .n.pos{color:var(--pos)} .hstat .n.neg{color:var(--neg)} .hstat .n.gold{color:var(--gold)}
+  .hstat .l{font-size:.82rem;color:var(--text-3);margin-top:8px}
+
+  /* progress bar */
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:99;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+
+  section{padding:64px 0;border-top:1px solid transparent}
+  .sec-num{font-family:var(--serif);font-size:1.1rem;color:var(--accent-2);font-weight:600;letter-spacing:.05em}
+  h2{font-size:clamp(1.6rem,3.2vw,2.2rem);font-weight:700;letter-spacing:-0.025em;margin:8px 0 8px}
+  .sub{color:var(--text-2);max-width:64ch;margin-bottom:34px;font-weight:300}
+  h3{font-size:1.25rem;font-weight:650;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+  p{margin-bottom:16px;color:var(--text-2)}
+  p.body{color:var(--text);max-width:68ch}
+  strong{color:var(--text);font-weight:650}
+  .em{color:var(--accent)}
+
+  /* TL;DR callout */
+  .tldr{background:linear-gradient(135deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);
+    border-left:3px solid var(--accent);border-radius:16px;padding:28px 30px;margin:8px 0}
+  .tldr ul{list-style:none;display:grid;gap:14px}
+  .tldr li{padding-left:30px;position:relative;color:var(--text)}
+  .tldr li::before{content:'';position:absolute;left:0;top:9px;width:9px;height:9px;border-radius:50%;
+    background:var(--accent)}
+  .tldr li b{color:var(--gold)}
+
+  /* mechanism cards */
+  .mech{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px}
+  .mcard{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:26px}
+  .mcard .tag{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .mcard.delta .tag{color:var(--accent)} .mcard.vega .tag{color:var(--accent-2)}
+  .mcard h4{font-size:1.5rem;font-weight:700;margin:6px 0 10px}
+  .mcard p{font-size:.95rem;margin:0}
+  .formula{background:var(--bg-0);border:1px solid var(--line);border-radius:12px;padding:18px 22px;
+    margin-top:22px;font-family:var(--serif);font-size:1.35rem;text-align:center;color:var(--text)}
+  .formula .x{color:var(--accent);margin:0 12px;font-weight:700}
+
+  /* event card */
+  .ev{background:var(--bg-1);border:1px solid var(--line);border-radius:18px;padding:30px;margin-bottom:26px}
+  .ev-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+  .ev-title .yr{font-family:var(--serif);font-size:1.05rem;color:var(--accent);font-weight:600}
+  .ev-title h3{margin-top:2px}
+  .ev-desc{color:var(--text-3);font-size:.92rem;max-width:52ch;margin-top:6px}
+  .ev-hero{display:flex;gap:26px;flex-wrap:wrap}
+  .ev-hero .b .n{font-family:var(--serif);font-size:2.1rem;font-weight:600;line-height:1}
+  .ev-hero .b .n.neg{color:var(--neg)} .ev-hero .b .n.gold{color:var(--gold)}
+  .ev-hero .b .l{font-size:.74rem;color:var(--text-3);margin-top:5px}
+  .ev-meta{display:flex;gap:20px;flex-wrap:wrap;margin:18px 0 20px;font-size:.86rem;color:var(--text-2);
+    padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .ev-meta span b{color:var(--text)}
+  .ev-meta .iv-arrow{color:var(--neg);font-weight:700}
+
+  table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:6px}
+  th,td{padding:11px 12px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{color:var(--text-3);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;
+    border-bottom:1px solid var(--line)}
+  tbody tr{border-bottom:1px solid rgba(42,50,82,.5)}
+  tbody tr:nth-child(odd){background:rgba(255,255,255,.012)}
+  tbody tr.hot{background:rgba(231,196,106,.07)}
+  td.mult{font-family:var(--serif);font-size:1.15rem;font-weight:600;color:var(--gold)}
+  td.otm{font-weight:600;color:var(--text)}
+  .barcell{position:relative}
+  .bar{position:absolute;left:0;top:50%;transform:translateY(-50%);height:60%;border-radius:4px;
+    background:linear-gradient(90deg,rgba(231,196,106,.35),rgba(231,196,106,.12));z-index:0}
+  .barcell span{position:relative;z-index:1}
+
+  /* compare chart */
+  .cmp{display:grid;gap:14px;margin-top:8px}
+  .cmprow{display:grid;grid-template-columns:200px 1fr;align-items:center;gap:16px}
+  .cmprow .nm{font-size:.9rem;color:var(--text-2)}
+  .cmprow .track{background:var(--bg-2);border-radius:8px;height:30px;position:relative;overflow:hidden}
+  .cmprow .fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:12px;font-family:var(--serif);font-weight:600;font-size:1rem;color:#0a0c16;
+    background:linear-gradient(90deg,var(--gold),#f0d98a);min-width:60px;
+    transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+
+  /* reality / warning */
+  .warnbox{background:linear-gradient(135deg,rgba(255,91,110,.08),var(--bg-1));
+    border:1px solid rgba(255,91,110,.3);border-left:3px solid var(--neg);border-radius:16px;padding:28px 30px}
+  .warnbox h3{color:var(--neg)}
+  .reality-stats{display:flex;gap:30px;flex-wrap:wrap;margin:18px 0}
+  .reality-stats .b .n{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--neg)}
+  .reality-stats .b .l{font-size:.8rem;color:var(--text-3);margin-top:4px;max-width:22ch}
+
+  .note{font-size:.85rem;color:var(--text-3);border-left:2px solid var(--line);padding-left:16px;margin-top:8px}
+  .caveats{display:grid;gap:12px;margin-top:8px}
+  .caveats li{list-style:none;padding:16px 20px;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:12px;color:var(--text-2);font-size:.92rem}
+  .caveats li b{color:var(--warn)}
+
+  footer{padding:50px 0 80px;border-top:1px solid var(--line);color:var(--text-3);font-size:.85rem}
+  footer a{color:var(--text-2)}
+  .src{display:grid;gap:6px;margin-top:14px;font-size:.82rem}
+
+  .disclaimer{background:var(--bg-2);border:1px dashed var(--line);border-radius:12px;padding:18px 22px;
+    color:var(--text-3);font-size:.85rem;margin-top:30px}
+
+  @media(max-width:760px){
+    .mech{grid-template-columns:1fr}
+    .cmprow{grid-template-columns:130px 1fr}
+    .hero{padding:90px 0 50px}
+    th,td{padding:9px 7px;font-size:.8rem}
+  }
+  @media print{body{background:#fff;color:#000}.hero{background:none}#prog{display:none}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">KOSPI · OTM PUT · 데이터 검증 리포트</div>
+    <h1>코스피 폭락장에서<br><span class="hl">외가격 풋옵션</span>은<br>정말 큰 수익을 냈는가</h1>
+    <p class="lead">"폭락이 임박했다"는 직관을, 2008·2011·2018·2020·2024년 5대 폭락 국면의
+      실제 지수·변동성 데이터와 Black-Scholes 옵션 모델로 사후 검증했다.</p>
+    <div class="hero-stats">
+      <div class="hstat"><div class="n gold" id="h-max">—</div><div class="l">최고 수익배수 (2020 코로나, -10% OTM)</div></div>
+      <div class="hstat"><div class="n neg" id="h-drop">—</div><div class="l">검증한 폭락 국면 수 / 최대 낙폭</div></div>
+      <div class="hstat"><div class="n pos" id="h-prem">—</div><div class="l">평상시 -5% OTM 풋 월 보험료 (지수 대비)</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- 0. TL;DR -->
+<section id="tldr">
+  <div class="sec-num">00 — 한눈에</div>
+  <h2>결론부터: "맞다, 단 두 개의 조건이 동시에 맞을 때만"</h2>
+  <div class="tldr">
+    <ul>
+      <li>과거 5대 폭락 국면 모두에서, 폭락 1개월 전 <strong>외가격 풋</strong>을 사뒀다면
+        저점에서 <b>수 배~수백 배</b>의 수익이 가능했다. 외가격이 깊을수록 배수는 폭발적으로 커진다.</li>
+      <li>그 동력은 <strong>두 힘의 곱</strong>이다 — 지수 하락(<span class="em">델타</span>)과
+        공포로 인한 변동성 급등(<span class="em">베가</span>). 2020년처럼 둘이 동시에 터지면
+        <b>-10% 외가격 풋이 약 983배</b>가 됐다.</li>
+      <li>그러나 이건 <strong>사후·생존편향</strong>의 숫자다. 폭락이 <b>만기 전에</b> 오지 않으면
+        프리미엄은 0으로 소멸한다. 실패한 달들의 비용이 빠져 있다.</li>
+      <li>핵심 변수는 수익률이 아니라 <strong>타이밍</strong>. "시간이 얼마 안 남았다"는 직관이
+        맞다 해도, 그게 <b>이번 만기 안</b>이어야 한다는 게 진짜 베팅이다.</li>
+    </ul>
+  </div>
+  <p class="note">본 리포트는 교육·연구 목적의 사후 시나리오 분석이며, 특정 종목·상품의
+    매매 권유가 아니다. 모든 수치는 Black-Scholes 모델 기반 추정치다(§방법론·한계 참조).</p>
+</section>
+
+<!-- 1. 메커니즘 -->
+<section id="mech">
+  <div class="sec-num">01 — 메커니즘</div>
+  <h2>왜 외가격 풋은 폭락장에서 '터지는'가</h2>
+  <p class="sub">평상시 외가격 풋은 거의 가치가 없다(그래서 싸다). 폭락이 오면 두 개의 엔진이
+    동시에 점화되며, 싸게 산 풋의 가격이 비선형적으로 폭증한다.</p>
+  <div class="mech">
+    <div class="mcard delta">
+      <div class="tag">Engine 1 · 델타(Δ)</div>
+      <h4>지수가 행사가를 향해 무너진다</h4>
+      <p>외가격 풋은 지수가 행사가 아래로 내려가야 내재가치가 생긴다. 지수가 -30% 빠지면
+        깊은 외가격이던 풋이 <strong>깊은 내가격</strong>으로 바뀌며 가치가 0에서 수백 포인트로 점프한다.</p>
+    </div>
+    <div class="mcard vega">
+      <div class="tag">Engine 2 · 베가(ν)</div>
+      <h4>공포가 변동성을 폭등시킨다</h4>
+      <p>VKOSPI(공포지수)는 평시 13~17에서 폭락 시 <strong>45~70</strong>으로 치솟는다.
+        변동성이 오르면 <em>모든</em> 옵션의 시간가치가 부풀어, 아직 외가격인 풋조차 비싸진다.</p>
+    </div>
+  </div>
+  <div class="formula">
+    OTM 풋 수익배수 <span class="x">≈</span> 델타 효과 <span class="x">×</span> 베가 효과
+  </div>
+  <p class="note">아래 표의 <strong>'델타만'</strong> 열은 변동성이 그대로였다고 가정한 수익배수다.
+    실제(<strong>'수익배수'</strong>) 열과의 차이가 곧 <em>베가(공포)</em>의 기여분이다. 급락이
+    짧고 날카로울수록(2020·2024) 베가 기여가 커진다.</p>
+</section>
+
+<!-- 2. 사례별 검증 -->
+<section id="cases">
+  <div class="sec-num">02 — 사례별 검증</div>
+  <h2>5대 폭락 국면, 실제 데이터로 돌려보기</h2>
+  <p class="sub">공통 가정 — 폭락 약 1개월 전(잔존만기 45일) 진입, 저점에서 익절 청산.
+    수익배수(×) = 저점 청산 이론가 ÷ 진입 프리미엄. 지수 단위 프리미엄(포인트).</p>
+  <div id="event-cards"></div>
+</section>
+
+<!-- 3. 비교 -->
+<section id="compare">
+  <div class="sec-num">03 — 비교</div>
+  <h2>같은 -10% 외가격 풋, 사건별 수익배수</h2>
+  <p class="sub">동일하게 -10% 외가격 풋을 매수했다고 가정했을 때의 수익배수. 급락 폭과
+    변동성 급등이 동시에 컸던 국면일수록 막대가 길다.</p>
+  <div class="cmp" id="cmp-chart"></div>
+  <p class="note" style="margin-top:22px"><strong>왜 2018(-14.7%)이 2008(-34.4%)보다 배수가 클까?</strong>
+    배수는 낙폭만이 아니라 <em>진입 시점에 풋이 얼마나 쌌는지</em>에 달려 있다. 2018·2020년은
+    평시 변동성(IV 14%)이 낮아 외가격 풋이 거의 공짜(진입료 0.5~0.6포인트)였던 반면, 2008년은
+    이미 IV 30%로 풋이 비쌌다(10.6포인트). <strong>'싸게 사서 공포에 판다'</strong>가 배수 게임의 본질 —
+    그래서 평온할 때 미리 사두는 외가격 풋의 배수가 가장 폭발적이다.</p>
+</section>
+
+<!-- 4. 현실 점검 -->
+<section id="reality">
+  <div class="sec-num">04 — 현실 점검</div>
+  <h2>그런데, 빠진 비용 — '꽝'의 달들</h2>
+  <p class="sub">위 표는 모두 <strong>폭락이 실제로 온 달</strong>만 모은 것이다. 진짜 손익은
+    아무 일 없던 수많은 달의 소멸한 프리미엄까지 합산해야 한다.</p>
+  <div class="warnbox">
+    <h3>⚠ Base-rate: 매달 -5% 외가격 풋을 '보험'처럼 산다면</h3>
+    <div class="reality-stats">
+      <div class="b"><div class="n" id="r-prem">—</div><div class="l">평상시 30일물 -5% OTM 풋 프리미엄 (지수 대비)</div></div>
+      <div class="b"><div class="n" id="r-be">—</div><div class="l">코로나급 대박 1회로 회수되는 '꽝' 개월 수</div></div>
+      <div class="b"><div class="n">-100%</div><div class="l">폭락 없는 달의 만기 손익 (전액 소멸)</div></div>
+    </div>
+    <p class="body">즉 이 전략은 <strong>'드물게 큰 승리 + 자주 작은 패배'</strong> 구조다.
+      대박 1회가 수십 개월치 보험료를 갚아주지만, <strong>그 대박이 만기 안에 오지 않으면</strong>
+      계좌는 매달 조금씩 녹는다. 그래서 "폭락이 임박했다"는 <em>방향</em>이 맞아도,
+      <strong>만기·행사가 선택(타이밍)</strong>에서 베팅의 성패가 갈린다.</p>
+  </div>
+</section>
+
+<!-- 5. 한계 -->
+<section id="caveats">
+  <div class="sec-num">05 — 한계와 주의</div>
+  <h2>이 숫자를 그대로 믿으면 안 되는 이유</h2>
+  <ul class="caveats">
+    <li><b>모델가 ≠ 체결가.</b> 모든 프리미엄은 Black-Scholes 이론가다. 실제 KRX 코스피200
+      옵션은 호가 스프레드·유동성·딥OTM 가격 하한(1틱) 때문에 진입가가 더 비싸고 청산가가 더 쌀 수 있다.
+      특히 폭락 순간엔 매수호가가 사라져 '이론상 대박'을 못 파는 경우가 흔하다.</li>
+    <li><b>완벽한 타이밍 가정.</b> '폭락 1개월 전 고점 부근 진입'은 사후에야 아는 지점이다.
+      실제로는 언제 폭락할지 모른 채 매달 비용을 치러야 한다.</li>
+    <li><b>생존편향.</b> 폭락이 온 5개 국면만 골랐다. 같은 기간 폭락 없이 소멸한 수십~수백 번의
+      만기는 표에 없다.</li>
+    <li><b>변동성 추정치.</b> 2008년은 VKOSPI(2009-04 도입) 이전이라 실현변동성 기반 추정을 썼다.
+      진입·청산 IV는 대표값이며 ±10p 오차에도 배수는 크게 달라진다.</li>
+    <li><b>유럽형·만기 리스크.</b> 코스피200 옵션은 유럽형이라 만기 전 행사가 불가. 폭락이
+      만기 직후 오면 같은 사건이라도 수익이 0이 된다.</li>
+  </ul>
+  <div class="disclaimer">
+    면책: 본 문서는 과거 데이터에 대한 정량 분석·교육 자료이며 투자 자문 또는 매매 권유가 아니다.
+    옵션 매수는 원금 전액 손실이 빈번한 고위험 거래다. 투자 판단과 책임은 전적으로 본인에게 있다.
+  </div>
+</section>
+
+<footer class="wrap">
+  <div class="sec-num">06 — 방법론 & 출처</div>
+  <p style="margin-top:10px;color:var(--text-2)">
+    재현 스크립트: <code style="color:var(--gold)">kospi_put_otm_analysis.py</code>
+    (표준 라이브러리만 사용) · 결과 데이터: <code style="color:var(--gold)">kospi_put_otm_results.json</code>.
+    유럽형 풋 Black-Scholes로 진입/저점 이론가를 계산하고 수익배수를 도출했다.
+  </p>
+  <div class="src">
+    <span>· 코스피 지수 종가·일자: 한국거래소(KRX), Investing.com 과거 데이터, 언론 보도(연합·MBC·헤럴드 등)</span>
+    <span>· VKOSPI: 2020-03-19 사상최고 69.24(장중 ~71), 2024-08-05 +110.66% 급등 45.86 등 공개 보도 기준</span>
+    <span>· 2008 최고 2,064.85(07-10-31) → 저점 938.75(08-10-24, -54.5%) · 2024 최고 2,891.35(7/11) → 2,441.55(8/5, -8.77% 단일 최대)</span>
+  </div>
+  <p style="margin-top:20px;color:var(--text-3)">생성일 2026-06-02 · 데이터 검증 분석 리포트</p>
+</footer>
+
+</main>
+
+<script>
+const DATA = {
+  "assumptions": {
+    "entry_dte_days": 45,
+    "model": "Black-Scholes (European put)",
+    "otm_levels": [
+      0.0,
+      0.025,
+      0.05,
+      0.075,
+      0.1
+    ],
+    "monthly_5otm_premium_pct": 0.212
+  },
+  "events": [
+    {
+      "key": "2008_GFC",
+      "name": "2008 글로벌 금융위기",
+      "desc": "리먼 사태 → 신용경색. 코스피 사상최고(2,064.85, 07-10-31) 대비 -54.5%.",
+      "note": "VKOSPI 도입 전. IV는 당시 실현변동성 기반 추정.",
+      "entry_date": "2008-09-24",
+      "trough_date": "2008-10-24",
+      "entry_level": 1430.0,
+      "trough_level": 938.75,
+      "held_days": 30,
+      "drop_pct": -34.4,
+      "iv_entry": 0.3,
+      "iv_exit": 0.7,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 1430.0,
+          "entry_prem": 55.59,
+          "exit_prem": 488.389,
+          "exit_delta_only": 488.315,
+          "intrinsic": 491.25,
+          "mult_full": 8.79,
+          "mult_delta_only": 8.78,
+          "mult_intrinsic": 8.84,
+          "ret_full_pct": 778.6
+        },
+        {
+          "otm": 0.025,
+          "strike": 1394.25,
+          "entry_prem": 39.595,
+          "exit_prem": 452.773,
+          "exit_delta_only": 452.638,
+          "intrinsic": 455.5,
+          "mult_full": 11.44,
+          "mult_delta_only": 11.43,
+          "mult_intrinsic": 11.5,
+          "ret_full_pct": 1043.5
+        },
+        {
+          "otm": 0.05,
+          "strike": 1358.5,
+          "entry_prem": 26.931,
+          "exit_prem": 417.203,
+          "exit_delta_only": 416.961,
+          "intrinsic": 419.75,
+          "mult_full": 15.49,
+          "mult_delta_only": 15.48,
+          "mult_intrinsic": 15.59,
+          "ret_full_pct": 1449.2
+        },
+        {
+          "otm": 0.075,
+          "strike": 1322.75,
+          "entry_prem": 17.389,
+          "exit_prem": 381.711,
+          "exit_delta_only": 381.285,
+          "intrinsic": 384.0,
+          "mult_full": 21.95,
+          "mult_delta_only": 21.93,
+          "mult_intrinsic": 22.08,
+          "ret_full_pct": 2095.2
+        },
+        {
+          "otm": 0.1,
+          "strike": 1287.0,
+          "entry_prem": 10.59,
+          "exit_prem": 346.349,
+          "exit_delta_only": 345.608,
+          "intrinsic": 348.25,
+          "mult_full": 32.7,
+          "mult_delta_only": 32.63,
+          "mult_intrinsic": 32.88,
+          "ret_full_pct": 3170.4
+        }
+      ]
+    },
+    {
+      "key": "2011_EU",
+      "name": "2011 유럽 재정위기·美 신용강등",
+      "desc": "S&P의 미국 신용등급 강등 + 유로존 위기. 8/2~8/9 6거래일 연속 -2%대.",
+      "note": "옵션 수명 내 저점(8/19). 이후 9월 말 1,652까지 추가 하락.",
+      "entry_date": "2011-08-01",
+      "trough_date": "2011-08-19",
+      "entry_level": 2172.0,
+      "trough_level": 1744.0,
+      "held_days": 18,
+      "drop_pct": -19.7,
+      "iv_entry": 0.2,
+      "iv_exit": 0.42,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2172.0,
+          "entry_prem": 56.472,
+          "exit_prem": 425.235,
+          "exit_delta_only": 422.785,
+          "intrinsic": 428.0,
+          "mult_full": 7.53,
+          "mult_delta_only": 7.49,
+          "mult_intrinsic": 7.58,
+          "ret_full_pct": 653.0
+        },
+        {
+          "otm": 0.025,
+          "strike": 2117.7,
+          "entry_prem": 33.725,
+          "exit_prem": 372.834,
+          "exit_delta_only": 368.62,
+          "intrinsic": 373.7,
+          "mult_full": 11.06,
+          "mult_delta_only": 10.93,
+          "mult_intrinsic": 11.08,
+          "ret_full_pct": 1005.5
+        },
+        {
+          "otm": 0.05,
+          "strike": 2063.4,
+          "entry_prem": 18.225,
+          "exit_prem": 321.52,
+          "exit_delta_only": 314.479,
+          "intrinsic": 319.4,
+          "mult_full": 17.64,
+          "mult_delta_only": 17.25,
+          "mult_intrinsic": 17.52,
+          "ret_full_pct": 1664.1
+        },
+        {
+          "otm": 0.075,
+          "strike": 2009.1,
+          "entry_prem": 8.777,
+          "exit_prem": 271.816,
+          "exit_delta_only": 260.446,
+          "intrinsic": 265.1,
+          "mult_full": 30.97,
+          "mult_delta_only": 29.67,
+          "mult_intrinsic": 30.2,
+          "ret_full_pct": 2996.7
+        },
+        {
+          "otm": 0.1,
+          "strike": 1954.8,
+          "entry_prem": 3.707,
+          "exit_prem": 224.391,
+          "exit_delta_only": 206.843,
+          "intrinsic": 210.8,
+          "mult_full": 60.54,
+          "mult_delta_only": 55.8,
+          "mult_intrinsic": 56.87,
+          "ret_full_pct": 5953.5
+        }
+      ]
+    },
+    {
+      "key": "2018_TRADE",
+      "name": "2018 미·중 무역분쟁 (검은 10월)",
+      "desc": "연초 사상최고(2,598.19, 01-29) 후 무역전쟁·금리인상 우려로 조정.",
+      "note": "상대적으로 완만한 -15% 조정. VKOSPI 28 부근.",
+      "entry_date": "2018-10-01",
+      "trough_date": "2018-10-29",
+      "entry_level": 2338.88,
+      "trough_level": 1996.05,
+      "held_days": 28,
+      "drop_pct": -14.7,
+      "iv_entry": 0.14,
+      "iv_exit": 0.28,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2338.88,
+          "entry_prem": 43.692,
+          "exit_prem": 341.381,
+          "exit_delta_only": 341.197,
+          "intrinsic": 342.83,
+          "mult_full": 7.81,
+          "mult_delta_only": 7.81,
+          "mult_intrinsic": 7.85,
+          "ret_full_pct": 681.3
+        },
+        {
+          "otm": 0.025,
+          "strike": 2280.41,
+          "entry_prem": 20.643,
+          "exit_prem": 283.409,
+          "exit_delta_only": 282.765,
+          "intrinsic": 284.358,
+          "mult_full": 13.73,
+          "mult_delta_only": 13.7,
+          "mult_intrinsic": 13.77,
+          "ret_full_pct": 1272.9
+        },
+        {
+          "otm": 0.05,
+          "strike": 2221.94,
+          "entry_prem": 7.973,
+          "exit_prem": 226.328,
+          "exit_delta_only": 224.338,
+          "intrinsic": 225.886,
+          "mult_full": 28.39,
+          "mult_delta_only": 28.14,
+          "mult_intrinsic": 28.33,
+          "ret_full_pct": 2738.7
+        },
+        {
+          "otm": 0.075,
+          "strike": 2163.46,
+          "entry_prem": 2.428,
+          "exit_prem": 171.363,
+          "exit_delta_only": 165.983,
+          "intrinsic": 167.414,
+          "mult_full": 70.59,
+          "mult_delta_only": 68.37,
+          "mult_intrinsic": 68.96,
+          "ret_full_pct": 6958.6
+        },
+        {
+          "otm": 0.1,
+          "strike": 2104.99,
+          "entry_prem": 0.562,
+          "exit_prem": 120.653,
+          "exit_delta_only": 108.509,
+          "intrinsic": 108.942,
+          "mult_full": 214.69,
+          "mult_delta_only": 193.08,
+          "mult_intrinsic": 193.86,
+          "ret_full_pct": 21369.5
+        }
+      ]
+    },
+    {
+      "key": "2020_COVID",
+      "name": "2020 코로나 팬데믹 쇼크",
+      "desc": "한 달 만에 -34%. VKOSPI 사상최고 69.24(장중 ~71). 교과서적 사례.",
+      "note": "지수 급락 + IV 폭등이 동시 발생한 최적 사례.",
+      "entry_date": "2020-02-19",
+      "trough_date": "2020-03-19",
+      "entry_level": 2210.0,
+      "trough_level": 1457.64,
+      "held_days": 29,
+      "drop_pct": -34.0,
+      "iv_entry": 0.14,
+      "iv_exit": 0.69,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2210.0,
+          "entry_prem": 41.622,
+          "exit_prem": 751.301,
+          "exit_delta_only": 751.149,
+          "intrinsic": 752.36,
+          "mult_full": 18.05,
+          "mult_delta_only": 18.05,
+          "mult_intrinsic": 18.08,
+          "ret_full_pct": 1705.1
+        },
+        {
+          "otm": 0.025,
+          "strike": 2154.75,
+          "entry_prem": 19.705,
+          "exit_prem": 696.199,
+          "exit_delta_only": 695.93,
+          "intrinsic": 697.11,
+          "mult_full": 35.33,
+          "mult_delta_only": 35.32,
+          "mult_intrinsic": 35.38,
+          "ret_full_pct": 3433.2
+        },
+        {
+          "otm": 0.05,
+          "strike": 2099.5,
+          "entry_prem": 7.628,
+          "exit_prem": 641.182,
+          "exit_delta_only": 640.71,
+          "intrinsic": 641.86,
+          "mult_full": 84.06,
+          "mult_delta_only": 84.0,
+          "mult_intrinsic": 84.15,
+          "ret_full_pct": 8305.8
+        },
+        {
+          "otm": 0.075,
+          "strike": 2044.25,
+          "entry_prem": 2.329,
+          "exit_prem": 586.306,
+          "exit_delta_only": 585.49,
+          "intrinsic": 586.61,
+          "mult_full": 251.77,
+          "mult_delta_only": 251.42,
+          "mult_intrinsic": 251.9,
+          "ret_full_pct": 25077.3
+        },
+        {
+          "otm": 0.1,
+          "strike": 1989.0,
+          "entry_prem": 0.541,
+          "exit_prem": 531.661,
+          "exit_delta_only": 530.27,
+          "intrinsic": 531.36,
+          "mult_full": 983.49,
+          "mult_delta_only": 980.91,
+          "mult_intrinsic": 982.93,
+          "ret_full_pct": 98248.6
+        }
+      ]
+    },
+    {
+      "key": "2024_YEN",
+      "name": "2024.8 엔캐리 청산 (블랙 먼데이)",
+      "desc": "8/5 하루 -8.77%(역대 최대 낙폭, 종가 2,441.55). VKOSPI 하루 +110% → 45.86.",
+      "note": "초단기 급락. 며칠 만에 반등 → '저점 매도(익절)' 타이밍이 관건.",
+      "entry_date": "2024-07-11",
+      "trough_date": "2024-08-05",
+      "entry_level": 2891.35,
+      "trough_level": 2441.55,
+      "held_days": 25,
+      "drop_pct": -15.6,
+      "iv_entry": 0.16,
+      "iv_exit": 0.46,
+      "rows": [
+        {
+          "otm": 0.0,
+          "strike": 2891.35,
+          "entry_prem": 58.62,
+          "exit_prem": 451.676,
+          "exit_delta_only": 444.26,
+          "intrinsic": 449.8,
+          "mult_full": 7.71,
+          "mult_delta_only": 7.58,
+          "mult_intrinsic": 7.67,
+          "ret_full_pct": 670.5
+        },
+        {
+          "otm": 0.025,
+          "strike": 2819.07,
+          "entry_prem": 30.315,
+          "exit_prem": 384.484,
+          "exit_delta_only": 372.117,
+          "intrinsic": 377.516,
+          "mult_full": 12.68,
+          "mult_delta_only": 12.27,
+          "mult_intrinsic": 12.45,
+          "ret_full_pct": 1168.3
+        },
+        {
+          "otm": 0.05,
+          "strike": 2746.78,
+          "entry_prem": 13.416,
+          "exit_prem": 319.985,
+          "exit_delta_only": 299.996,
+          "intrinsic": 305.232,
+          "mult_full": 23.85,
+          "mult_delta_only": 22.36,
+          "mult_intrinsic": 22.75,
+          "ret_full_pct": 2285.1
+        },
+        {
+          "otm": 0.075,
+          "strike": 2674.5,
+          "entry_prem": 4.95,
+          "exit_prem": 259.214,
+          "exit_delta_only": 228.099,
+          "intrinsic": 232.949,
+          "mult_full": 52.37,
+          "mult_delta_only": 46.08,
+          "mult_intrinsic": 47.06,
+          "ret_full_pct": 5137.1
+        },
+        {
+          "otm": 0.1,
+          "strike": 2602.22,
+          "entry_prem": 1.482,
+          "exit_prem": 203.339,
+          "exit_delta_only": 157.624,
+          "intrinsic": 160.665,
+          "mult_full": 137.2,
+          "mult_delta_only": 106.36,
+          "mult_intrinsic": 108.41,
+          "ret_full_pct": 13620.2
+        }
+      ]
+    }
+  ]
+};
+
+const fmtMult = v => (v>=100? Math.round(v) : v.toFixed(1)) + '×';
+const otmLabel = o => o===0 ? 'ATM' : '-'+(o*100).toFixed(1).replace('.0','')+'%';
+
+// hero
+(function(){
+  const covid = DATA.events.find(e=>e.key==='2020_COVID');
+  const r10 = covid.rows.find(r=>r.otm===0.10);
+  document.getElementById('h-max').textContent = Math.round(r10.mult_full)+'×';
+  const maxDrop = Math.min(...DATA.events.map(e=>e.drop_pct));
+  document.getElementById('h-drop').textContent = DATA.events.length+' / '+maxDrop+'%';
+  document.getElementById('h-prem').textContent = DATA.assumptions.monthly_5otm_premium_pct+'%';
+})();
+
+// event cards
+const wrap = document.getElementById('event-cards');
+const maxMultAll = Math.max(...DATA.events.flatMap(e=>e.rows.map(r=>r.mult_full)));
+DATA.events.forEach(e=>{
+  const maxRow = Math.max(...e.rows.map(r=>r.mult_full));
+  const rows = e.rows.map(r=>{
+    const hot = r.otm===0.10 ? ' class="hot"' : '';
+    const barw = (r.mult_full/maxRow*100).toFixed(1);
+    return `<tr${hot}>
+      <td class="otm">${otmLabel(r.otm)}</td>
+      <td>${r.strike.toFixed(1)}</td>
+      <td>${r.entry_prem.toFixed(2)}</td>
+      <td>${r.exit_prem.toFixed(1)}</td>
+      <td class="barcell mult"><div class="bar" style="width:${barw}%"></div><span>${fmtMult(r.mult_full)}</span></td>
+      <td style="color:var(--text-3)">${fmtMult(r.mult_delta_only)}</td>
+    </tr>`;
+  }).join('');
+  wrap.insertAdjacentHTML('beforeend', `
+    <div class="ev">
+      <div class="ev-head">
+        <div class="ev-title">
+          <div class="yr">${e.name.split(' ')[0]}</div>
+          <h3>${e.name.replace(/^[0-9.]+\s/,'')}</h3>
+          <div class="ev-desc">${e.desc}</div>
+        </div>
+        <div class="ev-hero">
+          <div class="b"><div class="n neg">${e.drop_pct}%</div><div class="l">지수 낙폭</div></div>
+          <div class="b"><div class="n gold">${fmtMult(maxRow)}</div><div class="l">-10% OTM 최대배수</div></div>
+        </div>
+      </div>
+      <div class="ev-meta">
+        <span>진입 <b>${e.entry_date}</b> @ ${e.entry_level.toFixed(0)}</span>
+        <span>→ 저점 <b>${e.trough_date}</b> @ ${e.trough_level.toFixed(0)} (${e.held_days}일)</span>
+        <span>IV <b>${(e.iv_entry*100).toFixed(0)}%</b> <span class="iv-arrow">→</span> <b>${(e.iv_exit*100).toFixed(0)}%</b></span>
+      </div>
+      <table>
+        <thead><tr>
+          <th>외가격</th><th>행사가</th><th>진입료</th><th>저점청산가</th><th>수익배수</th><th>델타만</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="note" style="margin-top:14px">${e.note}</p>
+    </div>`);
+});
+
+// compare chart (-10% OTM)
+const cmp = document.getElementById('cmp-chart');
+const items = DATA.events.map(e=>({
+  name:e.name.replace(/\s.*$/,'')+' '+e.name.split(' ').slice(1,3).join(' '),
+  short:e.name.split(' ')[0],
+  full:e.name,
+  v:e.rows.find(r=>r.otm===0.10).mult_full
+})).sort((a,b)=>b.v-a.v);
+const maxV = items[0].v;
+items.forEach((it,i)=>{
+  cmp.insertAdjacentHTML('beforeend',`
+    <div class="cmprow">
+      <div class="nm">${it.full}</div>
+      <div class="track"><div class="fill" data-w="${(it.v/maxV*100).toFixed(1)}" style="width:0">${fmtMult(it.v)}</div></div>
+    </div>`);
+});
+// animate on view
+const io = new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){
+  cmp.querySelectorAll('.fill').forEach((f,i)=>setTimeout(()=>f.style.width=f.dataset.w+'%',i*120));
+  io.disconnect();}});},{threshold:.2});
+io.observe(cmp);
+
+// reality stats
+document.getElementById('r-prem').textContent = DATA.assumptions.monthly_5otm_premium_pct+'%';
+(function(){
+  const covid = DATA.events.find(e=>e.key==='2020_COVID');
+  const r5 = covid.rows.find(r=>r.otm===0.05);
+  document.getElementById('r-be').textContent = '약 '+Math.round(r5.mult_full)+'개월';
+})();
+
+// progress bar
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  const p=h.scrollTop/(h.scrollHeight-h.clientHeight)*100;
+  document.getElementById('prog').style.width=p+'%';
+});
+</script>
+</body>
+</html>
