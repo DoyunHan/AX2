@@ -24,14 +24,16 @@ import pandas as pd
 @dataclass
 class StrategyConfig:
     # --- 박스(횡보) 정의 ---
-    box_lookback: int = 24          # 박스를 만드는 직전 봉 수
-    box_max_width_pct: float = 0.04  # 박스 폭 상한 (상단-하단)/하단, 4%
+    # 기본값은 BTC 1h(2021~2026) 실데이터로 검증된 값(아웃샘플 흑자 유지).
+    # 자세한 근거는 TUNING.md 참조. 자산/타임프레임이 바뀌면 재검증 필요.
+    box_lookback: int = 48          # 박스를 만드는 직전 봉 수 (1h=2일)
+    box_max_width_pct: float = 0.025  # 박스 폭 상한 (상단-하단)/하단, 2.5%
     # --- 돌파 판정 ---
     breakout_buffer_pct: float = 0.001  # 박스 경계 너머 버퍼 0.1%
-    vol_mult: float = 1.5               # 돌파봉 거래량 / 평균거래량 하한
+    vol_mult: float = 2.0               # 돌파봉 거래량 / 평균거래량 하한(거짓돌파 필터)
     # --- 추세 홀딩(ATR 트레일링) ---
     atr_period: int = 14
-    atr_trail_mult: float = 3.0     # 트레일링 스탑 = 최고가 - mult*ATR
+    atr_trail_mult: float = 8.0     # 트레일링 스탑 = 최고가 - mult*ATR (클수록 추세 길게 홀딩)
     allow_long: bool = True
     allow_short: bool = True
     max_hold_bars: int = 0          # 0이면 무제한(추세 끝까지 홀딩)

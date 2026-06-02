@@ -43,12 +43,12 @@ def build_args() -> argparse.Namespace:
     p.add_argument("--since", type=str, default=None, help="시작일 YYYY-MM-DD")
 
     # 전략 파라미터
-    p.add_argument("--box-lookback", type=int, default=24)
-    p.add_argument("--box-width", type=float, default=0.04, help="박스폭 상한(비율)")
-    p.add_argument("--vol-mult", type=float, default=1.5)
+    p.add_argument("--box-lookback", type=int, default=48)
+    p.add_argument("--box-width", type=float, default=0.025, help="박스폭 상한(비율)")
+    p.add_argument("--vol-mult", type=float, default=2.0)
     p.add_argument("--buffer", type=float, default=0.001)
     p.add_argument("--atr-period", type=int, default=14)
-    p.add_argument("--atr-trail", type=float, default=3.0)
+    p.add_argument("--atr-trail", type=float, default=8.0)
     p.add_argument("--no-long", action="store_true")
     p.add_argument("--no-short", action="store_true")
     p.add_argument("--max-hold", type=int, default=0)
@@ -69,7 +69,7 @@ def main() -> None:
 
     if a.demo:
         tf_min = {"15m": 15, "30m": 30, "1h": 60}.get(a.timeframe, 60)
-        df = generate_synthetic(n_bars=max(a.limit, 4000), timeframe_minutes=tf_min)
+        df = generate_synthetic(n_bars=max(a.limit, 12000), timeframe_minutes=tf_min)
         source = f"synthetic({len(df)} bars)"
     elif a.csv:
         df = load_csv(a.csv)

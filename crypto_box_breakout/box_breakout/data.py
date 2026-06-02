@@ -100,10 +100,11 @@ def generate_synthetic(
     i = 0
     while i < n_bars:
         regime = rng.choice(["box", "trend"], p=[0.55, 0.45])
-        length = int(rng.integers(30, 90))
         if regime == "box":
+            # 박스 구간은 기본 box_lookback(=48)보다 길게 유지해야 윈도우가 박스 안에 들어옴
+            length = int(rng.integers(60, 110))
             center = price
-            half = price * rng.uniform(0.01, 0.025)  # 박스 반폭 1~2.5%
+            half = price * rng.uniform(0.005, 0.011)  # 박스 반폭 0.5~1.1% (폭 ~1~2.2%)
             for _ in range(length):
                 if i >= n_bars:
                     break
@@ -114,6 +115,7 @@ def generate_synthetic(
                 vols[i] = rng.uniform(800, 1200)
                 i += 1
         else:
+            length = int(rng.integers(40, 90))
             drift = price * rng.uniform(0.0008, 0.0025) * rng.choice([1, -1])
             for k in range(length):
                 if i >= n_bars:
