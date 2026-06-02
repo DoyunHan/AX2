@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.csv
+!tests/**/*.csv
+.venv/
+data/
