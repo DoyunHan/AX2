@@ -2,6 +2,48 @@
 
 향후 Claude 세션이 본 저장소를 빠르게 파악하기 위한 핸드오프 문서.
 
+---
+
+## 🚀 노트북/새 PC 에서 이어받기 (Quick Resume)
+
+**사용자가 새 환경에서 Claude Code 세션을 열었다면, 이 섹션을 가장 먼저 안내할 것.**
+
+### 0. 최신 상태 동기화
+
+```bash
+git clone https://github.com/DoyunHan/AX2.git
+cd AX2
+git checkout claude/korean-stock-trading-ideas-5pJAO
+git pull
+```
+
+(이미 클론되어 있다면) `git pull origin claude/korean-stock-trading-ideas-5pJAO`
+
+### 1. 환경 설치
+
+```bash
+python3 -m venv venv
+source venv/bin/activate           # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. 동작 확인 (3분)
+
+```bash
+python3 kiwoom/tests/test_parsers.py            # 11 passed 떠야 정상
+python3 kiwoom/scripts/simulate_60day.py        # +58% / 잠금 0회 떠야 정상
+```
+
+→ 둘 다 통과하면 이전 세션의 결과가 그대로 재현된 것. 작업 이어가도 됨.
+
+### 3. 이전 진행 상황 한 줄
+
+**마하세븐 돌파 룰이 walk-forward 검증 통과 (OOS PF 3.28)** → 키움 OpenAPI+ 코드 트리 완성 (`kiwoom/`) → 60일 통합 mock 시뮬 +58% 확인 → **PR #1 master 머지 대기**.
+
+**남은 작업**: Windows 환경 셋업 후 `kiwoom_real.py` 실 OCX 검증 (사용자 단계 — `kiwoom/SETUP.md` 참고).
+
+---
+
 ## 프로젝트 한 줄 요약
 
 한국 데이트레이딩 대가들의 매매법을 백테스트로 검증해 **마하세븐 포식자 시스템 (돌파 모드)** 을 자동매매 룰로 채택, 키움 OpenAPI+ 로 운영할 코드까지 완성된 상태.
