@@ -36,10 +36,16 @@
 ## 설치
 
 ```bash
+# 원클릭(권장): 가상환경 + 의존성 + 테스트 + 데모
+bash setup.sh
+source .venv/bin/activate
+
+# 또는 수동
 pip install -r requirements.txt
-# 최소 구성(백테스트만): pip install pandas numpy
-# 실데이터 다운로드까지: + ccxt
 ```
+
+> 노트북 등 새 환경에서 이어서 작업한다면 [`HANDOFF.md`](HANDOFF.md)부터 읽으세요
+> (현재 상태·다음 할 일·시작 명령 정리).
 
 ## 빠른 시작
 
@@ -47,15 +53,17 @@ pip install -r requirements.txt
 # 1) 오프라인 데모 — 네트워크/API 키 불필요 (합성데이터)
 python run_backtest.py --demo
 
-# 2) Binance 실데이터로 1h봉 2000개 백테스트
+# 2) 실데이터 다운로드(인터넷 필요) → 백테스트
+python fetch_data.py                          # BTC/ETH 1h를 data/ 에 저장
+python run_backtest.py --csv data/btc_1h.csv
+python analyze.py data/btc_1h.csv             # 연도별·인/아웃샘플 견고성
+
+# 3) Binance에서 직접(단발) 백테스트
 python run_backtest.py --symbol "BTC/USDT:USDT" --timeframe 1h --limit 2000
 
-# 3) CSV로 백테스트 + 거래내역 저장
-python run_backtest.py --csv data/btc_1h.csv --save-trades trades.csv
-
-# 4) 파라미터 튜닝 예시
-python run_backtest.py --demo --box-lookback 36 --box-width 0.03 \
-    --vol-mult 2.0 --atr-trail 2.5 --leverage 5 --risk 0.01
+# 4) 파라미터 튜닝 / 그리드 탐색
+python run_backtest.py --demo --box-width 0.015 --atr-trail 6.0 --leverage 5
+python sweep.py data/btc_1h.csv
 ```
 
 ### 출력 예시 (데모)
