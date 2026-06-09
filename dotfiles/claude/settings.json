@@ -3,6 +3,6 @@
   "skipDangerousModePermissionPrompt": true,
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.sh"
+    "command": "\"C:\\Program Files\\Git\\usr\\bin\\bash.exe\" -c \"~/.claude/statusline.sh\""
   }
 }
