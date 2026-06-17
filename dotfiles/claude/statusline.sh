@@ -16,6 +16,7 @@ if [ -n "$PYBIN" ]; then
   STATUS=$(STATUSLINE_INPUT="$input" "$PYBIN" - <<'PY'
 import json
 import os
+import datetime
 
 _raw = os.environ.get("STATUSLINE_INPUT", "{}") or "{}"
 _b = _raw.find("{"); data = json.loads(_raw[_b:] if _b > 0 else _raw)
@@ -92,11 +93,23 @@ five_left = max(0, 100 - five_used)
 week_left = max(0, 100 - week_used)
 cost = money(dig(data, "cost", "total_cost_usd", default=0))
 
+def reset_clock(ts):
+    # resets_at is Unix epoch seconds; render as local HH:MM (24h). Absent -> "".
+    ts = as_int(ts)
+    if ts <= 0:
+        return ""
+    try:
+        return "/" + datetime.datetime.fromtimestamp(ts).strftime("%H:%M")
+    except (OverflowError, OSError, ValueError):
+        return ""
+
+five_reset = reset_clock(dig(data, "rate_limits", "five_hour", "resets_at"))
+
 print(
     f"[{model}] {folder} | "
     f"CTX:{color_used_pct(ctx_pct)}{ctx_pct}%{N} {compact_tokens(ctx_total)}/{compact_tokens(ctx_size)} | "
     f"turn:{compact_tokens(turn_in)}in/{compact_tokens(turn_out)}out | "
-    f"5h:{color_left_pct(five_left)}{five_left}%{N}left | "
+    f"5h:{color_left_pct(five_left)}{five_left}%{N}left{five_reset} | "
     f"7d:{color_left_pct(week_left)}{week_left}%{N}left | ${cost}"
 )
 PY
