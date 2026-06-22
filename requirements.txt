@@ -1,0 +1,15 @@
+# 필수 (sandbox / backtest / kiwoom 어댑터 단위 테스트)
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
+finance-datareader>=0.9
+
+# 단위 테스트 (선택 — 본 저장소의 test_*.py 는 pytest 없이도 단독 실행 가능)
+# pytest>=7.0
+
+# ============================================================================
+# Windows + 키움 OpenAPI+ 실 운영 시 추가 (Linux sandbox 에서는 설치 X)
+# ============================================================================
+# 반드시 32-bit Python 3.9 또는 3.10 사용 (OCX 가 32-bit COM 컴포넌트)
+# pip install pyqt5==5.15.9
+# 자세한 셋업: kiwoom/SETUP.md

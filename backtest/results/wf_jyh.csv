@@ -1,0 +1,4 @@
+train_period,test_period,best_params,train_n,train_win(%),train_expect(%),train_PF,test_n,test_win(%),test_expect(%),test_PF
+2026-03-30 ~ 2026-04-24,2026-04-24 ~ 2026-05-06,"{'fast': 3, 'slow': 15, 'atr_stop': 2.5, 'atr_target': 3.0, 'max_holding': 10}",73,80.8,8.037,13.83,14,57.1,2.378,1.91
+2026-04-09 ~ 2026-05-04,2026-05-04 ~ 2026-05-16,"{'fast': 8, 'slow': 20, 'atr_stop': 1.5, 'atr_target': 5.0, 'max_holding': 10}",49,69.4,6.913,4.96,19,10.5,-4.794,0.35
+2026-04-19 ~ 2026-05-14,2026-05-14 ~ 2026-05-26,"{'fast': 3, 'slow': 15, 'atr_stop': 1.5, 'atr_target': 5.0, 'max_holding': 5}",54,46.3,1.518,1.44,62,51.6,2.496,1.83
